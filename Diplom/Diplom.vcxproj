@@ -192,27 +192,37 @@
     <ClInclude Include="Diplom.h" />
     <ClInclude Include="DiplomDoc.h" />
     <ClInclude Include="DiplomView.h" />
+    <ClInclude Include="Encoder.h" />
     <ClInclude Include="FData.h" />
     <ClInclude Include="FileView.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="id3.hpp" />
     <ClInclude Include="MainFrm.h" />
+    <ClInclude Include="MP3.hpp" />
+    <ClInclude Include="MUCFile.h" />
     <ClInclude Include="OutputWnd.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="PropertiesWnd.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="trie.hpp" />
     <ClInclude Include="ViewTree.h" />
     <ClInclude Include="WAVFile.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Band.cpp" />
     <ClCompile Include="ClassView.cpp" />
     <ClCompile Include="ConvertedSample.cpp" />
     <ClCompile Include="Diplom.cpp" />
     <ClCompile Include="DiplomDoc.cpp" />
     <ClCompile Include="DiplomView.cpp" />
+    <ClCompile Include="Encoder.cpp" />
     <ClCompile Include="FData.cpp" />
     <ClCompile Include="FileView.cpp" />
+    <ClCompile Include="id3.cpp" />
     <ClCompile Include="MainFrm.cpp" />
+    <ClCompile Include="MP3.cpp" />
+    <ClCompile Include="MUCFile.cpp" />
     <ClCompile Include="OutputWnd.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -221,6 +231,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="PropertiesWnd.cpp" />
+    <ClCompile Include="trie.cpp" />
     <ClCompile Include="ViewTree.cpp" />
     <ClCompile Include="WAVFile.cpp" />
   </ItemGroup>

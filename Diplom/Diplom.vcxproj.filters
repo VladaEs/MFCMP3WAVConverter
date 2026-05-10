@@ -64,7 +64,22 @@
       <Filter>Header Files\customClasses</Filter>
     </ClInclude>
     <ClInclude Include="ConvertedSample.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\customClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="MUCFile.h">
+      <Filter>Header Files\customClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="Encoder.h">
+      <Filter>Header Files\customClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="MP3.hpp">
+      <Filter>Header Files\customClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="trie.hpp">
+      <Filter>Header Files\customClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="id3.hpp">
+      <Filter>Header Files\customClasses</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -105,6 +120,24 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ConvertedSample.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MUCFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Encoder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Band.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MP3.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="id3.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="trie.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

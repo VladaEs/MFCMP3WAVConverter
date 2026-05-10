@@ -51,51 +51,13 @@ namespace WAV {
 #pragma pack(pop)
 
 
-#pragma pack(push, 1)
-
-	struct CompressedWavHeader {
-		char codec_tag[4] = { 'M', 'U', 'C', '1' };
-
-		char window_name[4] = { 'H', 'A', 'N', 'N' };
-		int version = 1;
-
-		int sample_rate;
-		int channels;
-		int bits_per_sample;
-
-		int window_size;   // 2N
-		//int mdct_size;     // windowSize / 2 
-
-		int quant_levels;  // Q 
-
-		int total_frames;
-		int total_samples;
-	};
-#pragma pack(pop)
 
 
-#pragma pack(push, 1)
-	struct Band {
-		int start;
-		int end;
-	};
-#pragma pack(pop)
+
+
 
 	class WAVFile {
 	private:
-
-		std::vector<Band> bands = {
-			{0, 4},
-			{4, 8},
-			{8, 16},
-			{16, 32},
-			{32, 64},
-			{64, 128},
-			{128, 256},
-			{256, 512},
-			{512, 1024}
-		};
-
 
 		const int windowSize = 2048;
 
@@ -119,6 +81,10 @@ namespace WAV {
 		WAVFile() {
 			window.resize(windowSize);
 			hannWindow.resize(windowSize);
+		}
+
+		WAVFile(std::vector<float> decodedPCM) : WAVFile() {
+			
 		}
 		int getQ() {
 			return this->Q;
@@ -156,10 +122,10 @@ namespace WAV {
 
 			data.shrink_to_fit();
 			std::cout << "Map Started\n";
-			this->initCosTable(windowSize / 2);
+			//this->initCosTable(windowSize / 2);
 			std::cout << "\nMap Ended \n";
 			std::cout << "Raw Data started \n";
-			this->processRawData();
+			//this->processRawData();
 			std::cout << "Raw Data ended\n";
 			file.close();
 			return true;
@@ -172,7 +138,7 @@ namespace WAV {
 			if (!file.is_open()) {
 				return false;
 			}
-			file.write(reinterpret_cast<char *>(&header), sizeof(WAV::CompressedWavHeader));
+			//file.write(reinterpret_cast<char *>(&header), sizeof(WAV::CompressedWavHeader));
 
 			file.write(&data[0], data.size());
 		}
@@ -208,265 +174,53 @@ namespace WAV {
 
 			return this;
 		}
-		void processRawData() { // возможно нужен фикс!!!!!!!
-			
-			if (headerSet == false) {
-				return;
-			}
-			int max = 0;
-			int min = 0;
-			int bytesPerSample = this->header.bits_per_sample / 8;
-			int frameSize = header.num_channels * bytesPerSample;
-			int maxVal = (1 << header.bits_per_sample - 1);
-			for (int i = 0; i + frameSize < data.size(); i = i + frameSize) {
-				for (int ch = 0; ch < header.num_channels; ch++) {
-					int offset = i + ch * bytesPerSample; // здесь: i + ch + bytesPerSample 
-					int32_t sample = 0;
-					for (int b = 0; b < bytesPerSample; b++) {
-						sample |= static_cast<uint8_t>(data[offset + b]) << (8 * b);
-					}
-					int shift = 32 - header.bits_per_sample;
-					sample = (sample << shift) >> shift;
-					if (sample > max) max = sample;
-					if (sample < min) min = sample;
-					if (ch == 0) {
-						samplesLeft.push_back((float)sample / maxVal);
-					}
-					else if (ch == 1) {
-						samplesRight.push_back((float)sample / maxVal);
-					}
-
-				}
-			}
-
-			std::cout << "min: " << min << "\n";
-			std::cout << "max: " << max << "\n";
-			this->convertRawData();
-		}
-		void sampleTest() {
-			if (this->samplesLeft.size() <= 0) {
-				return;
-			}
-			for (int i = 0; i < 30; i++) {
-
-				std::cout << "Left: " << this->samplesLeft[i] << "\n";
-				std::cout << "Right: " << this->samplesRight[i] << "\n";
-			}
-		}
-
-
-
-
-		bool convertRawData() {
-
-			if (samplesLeft.empty() || samplesRight.empty())
-				return false;
-
-			int hopSize = windowSize / 2; // overlap
-			std::vector<float> spectrum;
-			std::vector<int> quantized;
-			std::vector<float> scaleFactors;
-			int loopCounter = 0;
-			for (int pos = 0; pos < samplesLeft.size(); pos += hopSize) {
-				/*
-				if (loopCounter >= 10 && true == true) {
-					std::cout << "break";
-					break;
-				}
-				*/
-				spectrum.clear();
-				quantized.clear();
-				scaleFactors.clear();
-
-				this->encodeFrame(spectrum, quantized, scaleFactors);
-				loopCounter++;
-
-			}
-			std::cout << "Done";
-			return true;
-		}
-
-
-		void encodeFrame(std::vector<float> &spectrum, std::vector<int> &quantized, std::vector<float> scaleFactors) {
-			spectrum.clear();
-			quantized.clear();
-			scaleFactors.clear();
-			this->handleHannWindow();
-
-
-			this->MDCT(window, spectrum);
-
-
-			this->quantization(spectrum, quantized, scaleFactors);
-			this->convertedChunks.push_back(WAV::ConvertedSample().setConvertedChunk(quantized).setScaleFactors(scaleFactors));
-		}
-
+		
 		bool writeDataToFile() {
-			CompressedWavHeader newWAVheader = this->prepareCustomHeader();
+			//CompressedWavHeader newWAVheader = this->prepareCustomHeader();
 			return false;
 		}
 
-		void handleHannWindow() {
-			this->fillWindow();
-			this->fillHannWindowValues();
-			this->applyHannWindow();
-		}
-		void fillWindow(int currPos = 0) {
 
-			for (int i = 0; i < windowSize; i++) {
+		// header Getters
 
-				int idx = currPos + i;
+		//-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-				if (idx >= samplesLeft.size()) {
-					window[i] = 0.0f;
-					continue;
-				}
-
-				float l = samplesLeft[idx];
-				float r = samplesRight[idx];
-
-				window[i] = 0.5f * (l + r);
-			}
-			std::cout << "Window\n";
-			for (int i = 0; i < windowSize; i++) {
-				std::cout << window[i] << "\n";
+			uint32_t getChunkSize() const {
+				return header.chunk_size;
 			}
 
-		}
-		void applyHannWindow() {
-
-			for (int i = 0; i < windowSize; i++) {
-				window[i] *= hannWindow[i];
-			}
-		}
-		// hann window creation
-		void fillHannWindowValues() {
-			hannWindow.clear();
-			float factor = 2.0f * M_PI / (windowSize - 1);
-			for (int i = 0; i < windowSize; i++) {
-				// float w = 0.5f * (1.0f - cos(2.0f * M_PI * i / (windowSize - 1)));
-				float w = 0.5f * (1.0f - cos(factor * i));
-				hannWindow.push_back(w);
-			}
-		}
-		// decide if we need to fill the window
-		void makeHannWindow() { // depricated
-			if (this->hannWindow.size() != windowSize) {
-				fillHannWindowValues();
+			uint32_t getSampleRate() const {
+				return header.sample_rate;
 			}
 
-		}
-
-		void mdct_test() {
-
-			int N = 1024;
-
-			std::vector<float> input(2 * N);
-			std::vector<float> spectrum;
-
-			mdct_test_sine_gen(input, 440.0f, 44100);
-
-			MDCT(input, spectrum);
-
-			for (int i = 0; i < 1024; i++) {
-				printf("%f\n", fabs(spectrum[i]));
-			}
-		}
-
-
-
-		void mdct_test_sine_gen(std::vector<float>& input, float freq, int sample_rate) {
-			for (int i = 0; i < input.size(); i++)
-			{
-				input[i] = sin(2 * M_PI * freq * i / sample_rate);
-			}
-		}
-
-		// transform (time, value) to (frenquency)
-		// result is an array of input.size()/2
-		// i can use the output to show graph in openGL
-		void MDCT(std::vector<float>& input, std::vector<float>& output) {
-			int N = input.size() / 2;
-			std::cout << "MDCT\n";
-			for (int i = 0; i < input.size(); i++) {
-				std::cout << input[i] << "\n";
-			}
-			//system("pause");
-			output.resize(N);
-
-			for (int k = 0; k < N; k++) {
-				float sum = 0.0f;
-				for (int n = 0; n < 2 * N; n++) {
-					sum += input[n] * cosTable[k][n];
-				}
-				output[k] = sum;
+			uint16_t getNumChannels() const {
+				return header.num_channels;
 			}
 
-		}
-
-
-
-		// quantization
-		// 1 - split output from MDCT into bands and quant them separetely
-		// 2 - normalise data and apply quantization
-		// 3 - convert float data to int
-		void quantization(std::vector<float> &input,
-			std::vector<int> &output,
-			std::vector<float> &scaleFactors)
-		{
-			if (input.empty())
-				return;
-
-			output.resize(input.size());
-			scaleFactors.clear();
-
-			//const float Q = 127.0f; // например, 8-бит квантование
-
-			for (int b = 0; b < bands.size(); b++) {
-
-				int start = bands[b].start;
-				int end = bands[b].end;
-				if ((int)input.size() < bands[b].end) {
-					end = (int)input.size();
-				}
-
-
-				float maxVal = 0.0f;
-
-				// 1. найти максимум
-				for (int i = start; i < end; i++) {
-					float val = fabs(input[i]);
-					if (val > maxVal)
-						maxVal = val;
-				}
-
-
-				if (maxVal == 0.0f)
-					maxVal = 1.0f;
-
-				scaleFactors.push_back(maxVal);
-
-				// 2. квантование
-				for (int i = start; i < end; i++) {
-					output[i] = (int)(input[i] / maxVal * Q);
-				}
+			uint16_t getBitsPerSample() const {
+				return header.bits_per_sample;
 			}
-		}
-		void initCosTable(int N) {
 
-			cosTable.resize(N, std::vector<float>(2 * N));
-
-			for (int k = 0; k < N; k++) {
-				for (int n = 0; n < 2 * N; n++) {
-
-					float angle = M_PI / N *
-						(n + 0.5f + N / 2.0f) *
-						(k + 0.5f);
-
-					cosTable[k][n] = cosf(angle);
-				}
+			uint32_t getByteRate() const {
+				return header.byte_rate;
 			}
-		}
+
+			uint16_t getBlockAlign() const {
+				return header.block_align;
+			}
+
+			uint32_t getDataSize() const {
+				return header.subchunk2_size;
+			}
+
+			uint16_t getAudioFormat() const {
+				return header.subchunk1_format;
+			}
+
+			uint32_t getFmtChunkSize() const {
+				return header.subchunk1_size;
+			}
+		//-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 
 	};

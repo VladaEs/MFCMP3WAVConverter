@@ -5,52 +5,68 @@
 #include <vector>
 #include <cmath>
 #include "ConvertedSample.h"
+#include "MUCFile.h"
+#include "WAVFile.h"
+#include "CodecContext.h"
+
 #define M_PI           3.14159265358979323846
 
 
-#pragma pack(push, 1)
-struct Band {
-	int start;
-	int end;
-};
-#pragma pack(pop)
 
 
 class Encoder
 {
 private:
 
-	std::vector<Band> bands = {
-		{0, 4},
-		{4, 8},
-		{8, 16},
-		{16, 32},
-		{32, 64},
-		{64, 128},
-		{128, 256},
-		{256, 512},
-		{512, 1024}
-	};
+	CodecContext config;
+
+	std::vector<Band> bands = config.getBands();
 
 
-	const int windowSize = 2048;
+	const int windowSize = config.getWindowSize();
 
-	int Q = 50; // степень квантования( качество сжатия)
-	std::vector<char> data; // remove
+	int Q = config.getQ(); // степень квантования( качество сжатия)
+	
 	std::vector<float> samplesLeft;
 	std::vector<float> samplesRight;
 	std::vector<float> window;
 
 	std::vector<float> hannWindow;
 	std::vector<WAV::ConvertedSample> convertedChunks;
-	std::string fileName; // remove
-	std::vector<std::vector<float>> cosTable;
+	std::vector<std::vector<float>> cosTable = config.getCosTable();
 	const char extension[4] = { 'M', 'U','X','3' };
 	int currPosition = 0;
 	bool headerSet = false;
 
-	
-	bool processRawData(std::vector<char> data, int bitsPerSample, int numChannels ) { 
+
+
+public:
+	Encoder() {
+		
+	}
+	Encoder(const std::vector<char>& data, int bitsPerSample, int numChannels) : Encoder() {
+		Encoder();
+		this->processRawData(data, bitsPerSample, numChannels);
+		
+	}
+	MUC::MUCFile Encode(const std::vector<char>& data, int bitsPerSample, int numChannels) {
+		MUC::MUCFile file;
+		this->processRawData(data, bitsPerSample, numChannels);
+		file.setConvertedData(convertedChunks);
+	}
+	MUC::MUCFile Encode(WAV::WAVFile & wav) {
+		MUC::MUCFile file;
+		this->processRawData(wav.getData(), wav.getBitsPerSample(), wav.getNumChannels());
+		file.setConvertedData(convertedChunks);
+		file.setCustomHeader(this->prepareCustomHeader(wav));
+	}
+
+
+
+
+
+
+	bool processRawData(const std::vector<char>& data, int bitsPerSample, int numChannels ) {
 		if (headerSet == false) {
 			return;
 		}
@@ -95,7 +111,7 @@ private:
 
 		int hopSize = windowSize / 2; // overlap
 		std::vector<float> spectrum;
-		std::vector<int> quantized;
+		std::vector<int8_t> quantized;
 		std::vector<float> scaleFactors;
 		int loopCounter = 0;
 		for (int pos = 0; pos < samplesLeft.size(); pos += hopSize) {
@@ -118,10 +134,7 @@ private:
 	}
 
 
-	void encodeFrame(std::vector<float> &spectrum, std::vector<int> &quantized, std::vector<float> scaleFactors) {
-		spectrum.clear();
-		quantized.clear();
-		scaleFactors.clear();
+	void encodeFrame(std::vector<float> &spectrum, std::vector<int8_t> &quantized, std::vector<float> scaleFactors) {
 		this->handleHannWindow();
 
 
@@ -211,9 +224,7 @@ private:
 	// 1 - split output from MDCT into bands and quant them separetely
 	// 2 - normalise data and apply quantization
 	// 3 - convert float data to int
-	void quantization(std::vector<float> &input,
-		std::vector<int> &output,
-		std::vector<float> &scaleFactors)
+	void quantization(std::vector<float> &input, std::vector<int8_t> &output, std::vector<float> &scaleFactors)
 	{
 		if (input.empty())
 			return;
@@ -254,23 +265,56 @@ private:
 		}
 	}
 
-	void initCosTable(int N) {
 
-		cosTable.resize(N, std::vector<float>(2 * N));
 
-		for (int k = 0; k < N; k++) {
-			for (int n = 0; n < 2 * N; n++) {
 
-				float angle = M_PI / N *
-					(n + 0.5f + N / 2.0f) *
-					(k + 0.5f);
+	void mdct_test() {
 
-				cosTable[k][n] = cosf(angle);
-			}
+		int N = 1024;
+
+		std::vector<float> input(2 * N);
+		std::vector<float> spectrum;
+
+		mdct_test_sine_gen(input, 440.0f, 44100);
+
+		MDCT(input, spectrum);
+
+		for (int i = 0; i < 1024; i++) {
+			printf("%f\n", fabs(spectrum[i]));
 		}
 	}
 
 
+
+	void mdct_test_sine_gen(std::vector<float>& input, float freq, int sample_rate) {
+		for (int i = 0; i < input.size(); i++)
+		{
+			input[i] = sin(2 * M_PI * freq * i / sample_rate);
+		}
+	}
+
+	void sampleTest() {
+		if (this->samplesLeft.size() <= 0) {
+			return;
+		}
+		for (int i = 0; i < 30; i++) {
+
+			std::cout << "Left: " << this->samplesLeft[i] << "\n";
+			std::cout << "Right: " << this->samplesRight[i] << "\n";
+		}
+	}
+
+	MUC::MUCHeader prepareCustomHeader(WAV::WAVFile &wav) {
+		MUC::MUCHeader header;
+		header.sample_rate = wav.getSampleRate();
+		header.channels = wav.getNumChannels();
+		header.bits_per_sample = wav.getBitsPerSample();
+		header.window_size = this->windowSize;
+		header.total_frames = convertedChunks.size();
+		header.total_samples = samplesLeft.size();
+		header.bands_amount = bands.size();
+		return header;
+	}
 
 };
 

@@ -34,7 +34,7 @@ private:
 	std::vector<float> hannWindow;
 	std::vector<WAV::ConvertedSample> convertedChunks;
 	std::vector<std::vector<float>> cosTable = config.getCosTable();
-	const char extension[4] = { 'M', 'U','X','3' };
+	const char extension[3] = { 'M', 'U','C' };
 	int currPosition = 0;
 	bool headerSet = false;
 
@@ -68,7 +68,7 @@ public:
 
 	bool processRawData(const std::vector<char>& data, int bitsPerSample, int numChannels ) {
 		if (headerSet == false) {
-			return;
+			return false;
 		}
 		int max = 0;
 		int min = 0;

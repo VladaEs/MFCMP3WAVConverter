@@ -81,6 +81,15 @@
     <ClInclude Include="id3.hpp">
       <Filter>Header Files\customClasses</Filter>
     </ClInclude>
+    <ClInclude Include="Decoder.h">
+      <Filter>Header Files\customClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="CodecContext.h">
+      <Filter>Header Files\customClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="FileSystemController.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Diplom.cpp">
@@ -138,6 +147,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="trie.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Decoder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CodecContext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FileSystemController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

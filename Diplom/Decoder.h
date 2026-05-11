@@ -23,6 +23,7 @@ private:
 	std::vector<std::vector<float>> cosTable = config.getCosTable();
 
 	std::vector<float> decodedPCM;
+	std::vector<int16_t> normalisedPCM;
 public:
 
 	MUC::MUCFile Decode(MUC::MUCFile& muc) {
@@ -42,6 +43,24 @@ public:
 				decodedPCM[pos + i] += frame[i];
 			}
 		}
+		this->normaliseData(this->decodedPCM);
+		return true;
+	}
+
+
+	bool normaliseData(std::vector<float> &pcm) {
+		normalisedPCM.resize(pcm.size());
+		for (int i = 0; i < pcm.size(); i++) {
+			float s = pcm[i];
+
+			if (s > 1.0f) s = 1.0f;
+			if (s < -1.0f) s = -1.0f;
+
+			int16_t normPCM = (int16_t)(pcm[i] * 32767.0f);
+			this->normalisedPCM[i] = normPCM;
+		}
+
+		return true;
 	}
 
 	std::vector<float> decodeFrame(WAV::ConvertedSample &chunk) {

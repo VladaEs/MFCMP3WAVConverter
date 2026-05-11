@@ -5,6 +5,7 @@
 #include <vector>
 #include <cmath>
 #include "ConvertedSample.h"
+#include "CodecContext.h"
 #define M_PI           3.14159265358979323846
 
 namespace WAV {
@@ -59,8 +60,9 @@ namespace WAV {
 	class WAVFile {
 	private:
 
-		const int windowSize = 2048;
-
+		
+		CodecContext config;
+		const int windowSize = config.getWindowSize();
 		WAV::WavHeader header;
 		int Q = 50; // степень квантования( качество сжатия)
 		std::vector<char> data;
@@ -71,7 +73,7 @@ namespace WAV {
 		std::vector<float> hannWindow;
 		std::vector<ConvertedSample> convertedChunks;
 		std::string fileName;
-		std::vector<std::vector<float>> cosTable;
+		//std::vector<std::vector<float>> cosTable = config.getCosTable();
 		const char extension[4] = { 'M', 'U','X','3' };
 		int currPosition = 0;
 		bool headerSet = false;

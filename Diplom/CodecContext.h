@@ -6,6 +6,8 @@
 #include <cmath>
 #include "ConvertedSample.h"
 
+#define M_PI       3.14159265358979323846
+
 #pragma pack(push, 1)
 struct Band {
 	int start;

@@ -7,10 +7,10 @@
 #include <vector>
 #include <string>
 #include <map>
-
+#include "InvMusicFile.h"
 #include "id3.hpp"
 
-class MP3 {
+class MP3: public InvMusicFile {
 public:
 	/*
 		constructors

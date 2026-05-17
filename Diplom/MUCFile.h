@@ -4,7 +4,7 @@
 #include <vector>
 #include <fstream>
 #include "ConvertedSample.h";
-
+#include "InvMusicFile.h" 
 
 namespace MUC {
 
@@ -32,7 +32,7 @@ namespace MUC {
 	};
 
 #pragma pack(pop)
-	class MUCFile
+class MUCFile: public InvMusicFile
 	{
 	protected:
 		std::vector<WAV::ConvertedSample> convertedData;

@@ -6,6 +6,8 @@
 #include <cmath>
 #include "ConvertedSample.h"
 #include "CodecContext.h"
+#include "CodecContext.h"
+#include "InvMusicFile.h"
 #define M_PI           3.14159265358979323846
 
 namespace WAV {
@@ -57,7 +59,7 @@ namespace WAV {
 
 
 
-	class WAVFile {
+	class WAVFile :public InvMusicFile {
 	private:
 
 		

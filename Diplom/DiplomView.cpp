@@ -27,8 +27,11 @@ BEGIN_MESSAGE_MAP(CDiplomView, CView)
 	ON_COMMAND(ID_FILE_PRINT, &CView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_DIRECT, &CView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, &CDiplomView::OnFilePrintPreview)
+	ON_COMMAND(ID_VIEW_OPEN, &CDiplomView::OnViewOpen)
 	ON_WM_CONTEXTMENU()
 	ON_WM_RBUTTONUP()
+	ON_WM_ERASEBKGND()
+	ON_WM_LBUTTONDOWN()
 END_MESSAGE_MAP()
 
 // CDiplomView construction/destruction
@@ -60,6 +63,14 @@ void CDiplomView::OnDraw(CDC* /*pDC*/)
 	if (!pDoc)
 		return;
 
+	SCROLLINFO si = {};
+	si.cbSize = sizeof(SCROLLINFO);
+	si.fMask = SIF_POS;
+	GetScrollInfo(SB_VERT, &si);
+	int scrollY = si.nPos;
+	TRACE(_T("Scroll pos Y - %d"), scrollY);
+	CPoint scrollPos(0, scrollY);
+	musicController.drawPlayer(this, scrollPos);
 	// TODO: add draw code for native data here
 }
 
@@ -124,5 +135,60 @@ CDiplomDoc* CDiplomView::GetDocument() const // non-debug version is inline
 }
 #endif //_DEBUG
 
+std::string CDiplomView::ConvertToSTDString(CString str) {
+	// Convert a TCHAR string to a LPCSTR
+	CT2CA pszConvertedAnsiString(str);
+	// construct a std::string using the LPCSTR input
+	std::string strStd(pszConvertedAnsiString);
+	return strStd;
+}
+
+CString CDiplomView::ConvertToCString(std::string str) {
+	CString cstr(str.c_str());
+	return cstr;
+}
+BOOL CDiplomView::OnEraseBkgnd(CDC* pDC)
+{
+	CRect rect;
+	GetClientRect(&rect);
+	pDC->FillSolidRect(rect, *this->activeBG);
+	return TRUE;
+}
 
 // CDiplomView message handlers
+void CDiplomView::OnViewOpen()
+{
+	CFolderPickerDialog m_dlg;
+	CString folderName;
+	m_dlg.m_ofn.lpstrTitle = _T("Select a folder where your music files are");
+	m_dlg.m_ofn.lpstrInitialDir = _T("C:\\");
+	if (m_dlg.DoModal() == IDOK) {
+		folderName = m_dlg.GetPathName();   // Use this to get the selected folder name 
+										  // after the dialog has closed
+
+		// May need to add a '\' for usage in GUI and for later file saving, 
+		// as there is no '\' on the returned name
+		folderName += _T("\\");
+		UpdateData(FALSE);   // To show updated folder in GUI
+
+		// Debug
+		TRACE("\n%S", folderName);
+	}
+	this->MusicDirectory = folderName;
+	fileSystemHandler.SetRootDir(ConvertToSTDString(MusicDirectory));
+	this->activeBG = &bgColorMusicLoaded;
+	//mp3Controller.SetRawData(this, fileSystemHandler.GetPathList());
+	musicController.setRawData(this, fileSystemHandler.GetPathList());
+	Invalidate();
+	OnInitialUpdate();
+
+}
+
+
+void CDiplomView::OnLButtonDown(UINT nFlags, CPoint point) {
+	for (int i = 0; i < musicController.getPlayButtons().size(); i++) {
+		if (musicController.getPlayButtonDataById(i)->rect.PtInRect(point)) {
+			TRACE(_T("PLAY BUTTON %d CLICKED\n"), i);
+		}
+	}
+}

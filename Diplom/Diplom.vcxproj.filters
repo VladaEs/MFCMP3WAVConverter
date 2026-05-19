@@ -16,6 +16,9 @@
     <Filter Include="Header Files\customClasses">
       <UniqueIdentifier>{15caf29b-fcf0-47b7-9aa6-c22f20061d1b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\customClasses">
+      <UniqueIdentifier>{f3b0e76e-0839-488b-8ce5-a849f3e5db9c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Diplom.h">
@@ -90,6 +93,18 @@
     <ClInclude Include="FileSystemController.h">
       <Filter>Header Files\customClasses</Filter>
     </ClInclude>
+    <ClInclude Include="InvMusicFile.h">
+      <Filter>Header Files\customClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="Music.hpp">
+      <Filter>Header Files\customClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="MusicController.hpp">
+      <Filter>Header Files\customClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="Helpers.hpp">
+      <Filter>Header Files\customClasses</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Diplom.cpp">
@@ -110,9 +125,6 @@
     <ClCompile Include="ClassView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ViewTree.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="OutputWnd.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -122,41 +134,44 @@
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="WAVFile.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="FData.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ConvertedSample.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MUCFile.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Encoder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Band.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MP3.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="id3.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="trie.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Decoder.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\customClasses</Filter>
     </ClCompile>
     <ClCompile Include="CodecContext.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\customClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="ConvertedSample.cpp">
+      <Filter>Source Files\customClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="Decoder.cpp">
+      <Filter>Source Files\customClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="Encoder.cpp">
+      <Filter>Source Files\customClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="FData.cpp">
+      <Filter>Source Files\customClasses</Filter>
     </ClCompile>
     <ClCompile Include="FileSystemController.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\customClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="id3.cpp">
+      <Filter>Source Files\customClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="MP3.cpp">
+      <Filter>Source Files\customClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="MUCFile.cpp">
+      <Filter>Source Files\customClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="ViewTree.cpp">
+      <Filter>Source Files\customClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="WAVFile.cpp">
+      <Filter>Source Files\customClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="trie.cpp">
+      <Filter>Source Files\customClasses</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

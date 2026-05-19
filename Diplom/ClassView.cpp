@@ -59,7 +59,6 @@ BEGIN_MESSAGE_MAP(CClassView, CDockablePane)
 	ON_WM_SETFOCUS()
 	ON_COMMAND_RANGE(ID_SORTING_GROUPBYTYPE, ID_SORTING_SORTBYACCESS, OnSort)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_SORTING_GROUPBYTYPE, ID_SORTING_SORTBYACCESS, OnUpdateSort)
-	ON_COMMAND(ID_VIEW_OPEN, &CClassView::OnViewOpen)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -324,7 +323,3 @@ void CClassView::OnChangeVisualStyle()
 }
 
 
-void CClassView::OnViewOpen()
-{
-	// TODO: Add your command handler code here
-}

@@ -5,7 +5,10 @@
 #include <vector>
 #include <afxwin.h>
 
-#include "mp3.hpp"
+#include "InvMusicFile.h"; 
+#include "MUCFile.h";
+#include "WAVFile.h";
+#include "MP3.hpp"; 
 
 
 
@@ -18,7 +21,7 @@ public:
 	double currentTimeMusic = 0;
 	int index;
 	double musicDuration;
-	MP3 file;
+	std::unique_ptr<InvMusicFile> file;
 
 
 
@@ -26,7 +29,6 @@ public:
 	Music(std::string p, std::string name) {
 		this->path = p;
 		this->musicName = name;
-
 	}
 	Music(CWnd* parent, std::string p, std::string name, int i) {
 		this->path = p;
@@ -106,29 +108,29 @@ public:
 		return this->musicName;
 	}
 	std::vector<char> getTag(std::string tag) {
-		return file.getTag(tag);
+		return file->getTag(tag);
 	}
 	bool setTag(std::string tag, std::vector<char> data) {
-		file.setTag(tag, data);
+		file->setTag(tag, data);
 		return true;
 	}
 	bool loadMusic() {
-		return file.read(path.c_str());
+		return file->read(path.c_str());
 	}
 	void changeMusicName(std::string data) {
-		file.setTag("TIT2", convertData(data));
+		file->setTag("TIT2", convertData(data));
 	}
 	std::vector<char> getMusicNameFile() {
 
-		std::vector<char> name2 = file.getTag("TIT2");
-		return file.getTag("TIT2");
+		std::vector<char> name2 = file->getTag("TIT2");
+		return file->getTag("TIT2");
 	}
 
 	std::vector<char> convertData(std::string data) {
 		return std::vector<char>(data.begin(), data.end());
 	}
 	bool saveFile() {
-		bool worked = file.write(path.c_str());
+		bool worked = file->write(path.c_str());
 		return worked;
 	}
 

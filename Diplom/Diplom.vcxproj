@@ -199,10 +199,14 @@
     <ClInclude Include="FileSystemController.h" />
     <ClInclude Include="FileView.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="Helpers.hpp" />
     <ClInclude Include="id3.hpp" />
+    <ClInclude Include="InvMusicFile.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="MP3.hpp" />
     <ClInclude Include="MUCFile.h" />
+    <ClInclude Include="Music.hpp" />
+    <ClInclude Include="MusicController.hpp" />
     <ClInclude Include="OutputWnd.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="PropertiesWnd.h" />

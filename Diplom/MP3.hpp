@@ -10,7 +10,7 @@
 #include "InvMusicFile.h"
 #include "id3.hpp"
 
-class MP3: public InvMusicFile {
+class MP3 : public InvMusicFile {
 public:
 	/*
 		constructors
@@ -23,7 +23,12 @@ public:
 	/*
 		input output methods
 	*/
-
+	bool play() {
+		return true;
+	}
+	bool pause() {
+		return true;
+	}
 	// read in mp3 file
 	bool read(const char* path) {
 		// open file
@@ -107,7 +112,9 @@ public:
 
 		return true;
 	}
-
+	std::string getExtension() {
+		return ".mp3";
+	}
 	// write out mp3 file
 	bool write(const char* path) {
 		recalcID3v2Size();
@@ -147,7 +154,6 @@ public:
 	/*
 		modifiers
 	*/
-
 	// erase tag
 	bool eraseTag(std::string tag) {
 		return id3v2Data.erase(tag) != 0;

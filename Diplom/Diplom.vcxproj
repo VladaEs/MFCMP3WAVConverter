@@ -207,6 +207,7 @@
     <ClInclude Include="MUCFile.h" />
     <ClInclude Include="Music.hpp" />
     <ClInclude Include="MusicController.hpp" />
+    <ClInclude Include="MusicPlayerDlg.h" />
     <ClInclude Include="OutputWnd.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="PropertiesWnd.h" />
@@ -233,6 +234,7 @@
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="MP3.cpp" />
     <ClCompile Include="MUCFile.cpp" />
+    <ClCompile Include="MusicPlayerDlg.cpp" />
     <ClCompile Include="OutputWnd.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

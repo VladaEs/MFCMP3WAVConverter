@@ -7,7 +7,7 @@
 #include "Music.hpp"
 #include "Music.hpp"
 #include "Helpers.hpp"
-
+#include "pch.h"
 namespace fs = std::filesystem;
 
 
@@ -31,7 +31,6 @@ class MusicController
 	int blockWidth = 90; // percent
 	int tableMargin = 20;
 
-
 	std::vector<PlayButtonData> playButtons;
 	Helpers helper;
 public:
@@ -49,12 +48,29 @@ public:
 		int i = 0;
 		for (const auto& fullPath : dataList) {
 			std::string filename = fs::path(fullPath).stem().string();
-
+			std::string extension = fs::path(fullPath).extension().string();
 			Music music(parent, fullPath, filename, i);
+			if (extension == ".mp3")
+			{
+				music.file = std::make_unique<MP3>();
+			}
+			else if (extension == ".wav")
+			{
+				music.file = std::make_unique<WAV::WAVFile>();
+			}
+			else if (extension == ".muc") {
+				music.file = std::make_unique<MUC::MUCFile>();
+			}
+
+			
 			MusicCollection.push_back((music));
 			++i;
 		}
 		return *this;
+	}
+
+	std::vector<Music> getMusicCollection() {
+		return this->MusicCollection;
 	}
 	std::vector<PlayButtonData> getPlayButtons() {
 		return this->playButtons;
@@ -111,11 +127,13 @@ public:
 
 		int oldBkMode = dc->SetBkMode(TRANSPARENT);
 		COLORREF oldTextColor = dc->SetTextColor(RGB(0, 0, 0));
-
+		
 		dc->TextOut(30, 15, _T("#"));
 		dc->TextOut(80, 15, _T("Song Name"));
+		dc->TextOut(clientRect.Width() - paddingLR * 3, 15, _T("Type"));
 		dc->TextOut(clientRect.Width() - paddingLR *2, 15, _T("Duration"));
 		dc->TextOut(clientRect.Width() - paddingLR, 15, _T("Play"));
+		
 		dc->MoveTo(20, 50);
 		dc->LineTo(clientRect.Width() - 20, 50);
 
@@ -173,15 +191,25 @@ public:
 		playButtons.push_back(buttonData);
 		dc->FillSolidRect(playButton, RGB(0, 120, 215));
 
+		dc->TextOut(
+			(rect.right - paddingLR * 3) + tableMargin,
+			rect.top + 10,
+			helper.ConvertToCString(
+				MusicCollection[i].getExtension()
+			)
+		);
+
+		dc->TextOut(
+			(rect.right - paddingLR * 2) + tableMargin,
+			rect.top + 10,
+			_T("03:45")
+		);
+
+
 		dc->DrawText(
 			_T("Play"),
 			playButton,
 			DT_CENTER | DT_VCENTER | DT_SINGLELINE
-		);
-		dc->TextOut(
-			(rect.right - paddingLR * 2 ) + tableMargin,
-			rect.top + 10,
-			_T("03:45")
 		);
 
 		dc->SetBkMode(oldBkMode);

@@ -218,7 +218,6 @@ public:
 			}
 			output[k] = sum;
 		}
-
 	}
 	// quantization
 	// 1 - split output from MDCT into bands and quant them separetely
@@ -241,23 +240,17 @@ public:
 			if ((int)input.size() < bands[b].end) {
 				end = (int)input.size();
 			}
-
-
 			float maxVal = 0.0f;
-
 			// 1. найти максимум
 			for (int i = start; i < end; i++) {
 				float val = fabs(input[i]);
 				if (val > maxVal)
 					maxVal = val;
 			}
-
-
-			if (maxVal == 0.0f)
+			if (maxVal == 0.0f) {
 				maxVal = 1.0f;
-
+			}
 			scaleFactors.push_back(maxVal);
-
 			// 2. квантование
 			for (int i = start; i < end; i++) {
 				output[i] = (int)(input[i] / maxVal * Q);

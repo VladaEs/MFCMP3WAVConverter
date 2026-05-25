@@ -155,7 +155,9 @@ namespace WAV {
 		std::vector<char> getData() {
 			return this->data;
 		}
-
+		std::string getExtension() {
+			return ".wav";
+		}
 		WAV::WavHeader & getHeader() {
 			return this->header;
 		}
@@ -178,7 +180,12 @@ namespace WAV {
 
 			return this;
 		}
-		
+		bool play() {
+			return true;
+		}
+		bool pause() {
+			return true;
+		}
 		bool writeDataToFile() {
 			//CompressedWavHeader newWAVheader = this->prepareCustomHeader();
 			return false;

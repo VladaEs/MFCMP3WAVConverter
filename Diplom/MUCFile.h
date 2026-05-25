@@ -113,11 +113,18 @@ class MUCFile: public InvMusicFile
 			return this->convertedData;
 		}
 
+		std::string getExtension() {
+			return ".muc";
+		}
 
 
+		bool play() {
+			return true;
+		}
 
-
-
+		bool pause() {
+			return true;
+		}
 
 
 

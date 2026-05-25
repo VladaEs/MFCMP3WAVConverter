@@ -12,6 +12,7 @@
 
 #include "DiplomDoc.h"
 #include "DiplomView.h"
+#include "MusicPlayerDlg.h";
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -188,6 +189,9 @@ void CDiplomView::OnViewOpen()
 void CDiplomView::OnLButtonDown(UINT nFlags, CPoint point) {
 	for (int i = 0; i < musicController.getPlayButtons().size(); i++) {
 		if (musicController.getPlayButtonDataById(i)->rect.PtInRect(point)) {
+			MusicPLayerDlg dlg;
+			dlg.setActiveMusic(musicController.getMusicCollection()[i]);
+			dlg.DoModal();
 			TRACE(_T("PLAY BUTTON %d CLICKED\n"), i);
 		}
 	}

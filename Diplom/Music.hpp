@@ -17,12 +17,12 @@ public:
 
 	std::string path;
 	std::string musicName;
+	std::string extension;
 	int timePaused = 0;
 	double currentTimeMusic = 0;
 	int index;
 	double musicDuration;
 	std::unique_ptr<InvMusicFile> file;
-
 
 
 
@@ -66,7 +66,9 @@ public:
 		}
 		return res;
 	}
-
+	std::string getExtension() {
+		return this->file->getExtension();
+	}
 
 
 	Music & SetPath(std::string path) {

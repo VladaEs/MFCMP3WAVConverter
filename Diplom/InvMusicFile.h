@@ -8,7 +8,6 @@ class InvMusicFile {
 public:
 	virtual bool read(const char* path) = 0;
 	virtual bool write(const char* path) = 0;
-	virtual std::string getExtension() = 0;
 	virtual std::vector<char> getTag(std::string tag) {
 		return {};
 	}

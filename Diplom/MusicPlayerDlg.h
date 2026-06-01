@@ -8,7 +8,7 @@ class MusicPLayerDlg : public CDialogEx
 
 	DECLARE_DYNAMIC(MusicPLayerDlg)
 public:
-	Music activeMusic;
+	Music* activeMusic = nullptr;
 	CImage musicImage;
 	CButton m_buttons[4]; // start, stop, pause, edit btns
 	CSliderCtrl m_slider;
@@ -20,17 +20,17 @@ public:
 	IWMPSettings *pSettings = nullptr;
 
 	HRESULT LoadImageFromMemory(const std::vector<char>& imageData, CImage& outImage);
-
+	void MusicPLayerDlg::initMusic(Music *m);
 	MusicPLayerDlg(CWnd* pParent = nullptr);
 	virtual ~MusicPLayerDlg();
 
 
 	bool setActiveMusic(Music &music) {
-		this->activeMusic = music;
+		this->activeMusic = &music;
 		//this->activeMusic.file
 		return true;
 	}
-	Music& getActiveMusic() {
+	Music* getActiveMusic() {
 		return activeMusic;
 	}
 

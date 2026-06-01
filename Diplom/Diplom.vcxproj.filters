@@ -114,6 +114,9 @@
     <ClInclude Include="MusicPlayerDlg.h">
       <Filter>Header Files\dialogs</Filter>
     </ClInclude>
+    <ClInclude Include="EditMusicDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Diplom.cpp">
@@ -184,6 +187,9 @@
     </ClCompile>
     <ClCompile Include="MusicPlayerDlg.cpp">
       <Filter>Source Files\dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="EditMusicDialog.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

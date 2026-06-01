@@ -40,7 +40,7 @@ public:
 		for (const auto& fullPath : dataList) {
 			std::string filename = fs::path(fullPath).stem().string();
 			Music music(fullPath, filename);
-			MusicCollection.push_back((music));
+			MusicCollection.push_back(std::move(music));
 
 		}
 	}
@@ -53,23 +53,38 @@ public:
 			if (extension == ".mp3")
 			{
 				music.file = std::make_unique<MP3>();
+				music.setExtension("mp3");
+				TRACE(
+					_T("AFTER SET: %S\n"),
+					music.getExtension().c_str()
+				);
 			}
 			else if (extension == ".wav")
 			{
 				music.file = std::make_unique<WAV::WAVFile>();
+				music.setExtension("wav");
+				TRACE(
+					_T("AFTER SET: %S\n"),
+					music.getExtension().c_str()
+				);
 			}
 			else if (extension == ".muc") {
 				music.file = std::make_unique<MUC::MUCFile>();
+				music.setExtension("muc");
 			}
 
 			
-			MusicCollection.push_back((music));
+			MusicCollection.push_back(std::move(music));
+			TRACE(
+				_T("VECTOR EXT: %S\n"),
+				MusicCollection.back().getExtension().c_str()
+			);
 			++i;
 		}
 		return *this;
 	}
 
-	std::vector<Music> getMusicCollection() {
+	std::vector<Music>& getMusicCollection() {
 		return this->MusicCollection;
 	}
 	std::vector<PlayButtonData> getPlayButtons() {

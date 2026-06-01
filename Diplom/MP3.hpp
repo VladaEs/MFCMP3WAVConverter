@@ -49,7 +49,11 @@ public:
 
 		// read data to buffer
 		data = std::vector<char>(fileSize);
-		file.read(&data[0], fileSize);
+		
+		file.read(
+			data.data(),
+			static_cast<std::streamsize>(fileSize)
+		);
 
 		/*
 			check if ID3v2 exists (beginning)

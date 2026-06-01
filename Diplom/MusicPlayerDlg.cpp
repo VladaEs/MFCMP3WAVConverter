@@ -3,7 +3,7 @@
 #include "MusicPLayerDlg.h"
 #include "Helpers.hpp"
 #include "resource.h"
-
+#include "EditMusicDialog.h"
 #include <algorithm>
 
 IMPLEMENT_DYNAMIC(MusicPLayerDlg, CDialogEx)
@@ -55,12 +55,16 @@ BOOL MusicPLayerDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 	Helpers helper;
+	this->activeMusic->loadMusic();
 	int buttonsStartX = 20;
 	int buttonsStartY = 350;
 	int buttonWidth = 100;
 	int buttonHeight = 50;
 	int margin = 20;
-	std::vector<std::string> buttonNames = { "Play", "Pause" , "Edit" };
+	std::vector<std::string> buttonNames = { "Play", "Pause" };
+	if (this->activeMusic->extension == "mp3") {
+		buttonNames.push_back("Edit");
+	}
 
 	int lastX = 0;
 	for (int i = 0; i < buttonNames.size(); i++) {
@@ -91,7 +95,7 @@ BOOL MusicPLayerDlg::OnInitDialog()
 	if (SUCCEEDED(hr)) {
 		hr = CoCreateInstance(__uuidof(WindowsMediaPlayer), NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pPlayer));
 		if (SUCCEEDED(hr)) {
-			CString musicPath = helper.ConvertToCString(activeMusic.GetPath());
+			CString musicPath = helper.ConvertToCString(activeMusic->GetPath());
 			BSTR bstrFile = SysAllocString(musicPath);
 			pPlayer->put_URL(bstrFile);
 			SysFreeString(bstrFile);
@@ -155,17 +159,28 @@ void MusicPLayerDlg::OnPaint()
 	CFont font;
 	font.CreatePointFont(120, _T("Segoe UI"));
 	CFont* pOldFont = dc.SelectObject(&font);
-	std::string MusicNameCleaned = help.cleanTag(activeMusic.getTag("TIT2"));
+	std::string MusicNameCleaned = help.cleanTag(activeMusic->getTag("TIT2"));
 	CString MusicName = help.ConvertToCString(MusicNameCleaned);
 
 	CRect imageRect2(25, 250, rect.Width() - 25, 270);
 	dc.DrawText(MusicName, &imageRect2, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 
 	CRect imageRect3(25, 280, rect.Width() - 25, 300);
-	std::string authorString = help.cleanTag(activeMusic.getTag("TPE1"));
+	std::string authorString = help.cleanTag(activeMusic->getTag("TPE1"));
 	CString author = help.ConvertToCString(authorString);
 	dc.DrawText(author, &imageRect3, DT_CENTER | DT_VCENTER | DT_SINGLELINE);
 	dc.SelectObject(pOldFont);
+}
+
+void MusicPLayerDlg::initMusic(Music *m) {
+	this->activeMusic = m;
+	activeMusic->loadMusic();
+	std::string pathWay = activeMusic->GetPath();
+	LoadImageFromMemory(activeMusic->getTag("APIC"), this->musicImage); // creating CImage from std::vector<char> array
+
+
+
+
 }
 
 HRESULT MusicPLayerDlg::LoadImageFromMemory(const std::vector<char>& rawData, CImage& outImage)
@@ -195,7 +210,7 @@ HRESULT MusicPLayerDlg::LoadImageFromMemory(const std::vector<char>& rawData, CI
 	}
 
 	if (found == end) {
-		// AfxMessageBox(L"Формат изображения не распознан");
+		 AfxMessageBox(L"Формат изображения не распознан");
 		return E_FAIL;
 	}
 
@@ -226,7 +241,7 @@ HRESULT MusicPLayerDlg::LoadImageFromMemory(const std::vector<char>& rawData, CI
 	// --- Загружаем изображение ---
 	hr = outImage.Load(spStream);
 	if (FAILED(hr) || outImage.IsNull()) {
-		// AfxMessageBox(L"Не удалось загрузить изображение");
+		AfxMessageBox(L"Не удалось загрузить изображение");
 		return E_FAIL;
 	}
 
@@ -277,12 +292,12 @@ void MusicPLayerDlg::OnBtnclickedStop()
 
 void MusicPLayerDlg::OnBtnclickedEdit()
 {
-	/*
+	
 	EditMusicDialog dlg;
 	dlg.initMusic(activeMusic);
 	pPlayer->close();
 	dlg.DoModal();
-	*/
+	
 }
 
 
@@ -294,7 +309,7 @@ void MusicPLayerDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
 		int sliderMax = m_slider.GetRangeMax();
 
 		double sliderPosPerc = (sliderPos * 100) / sliderMax;
-		double exactSecond = (sliderPosPerc * activeMusic.getMusicDuration()) / 100;
+		double exactSecond = (sliderPosPerc * activeMusic->getMusicDuration()) / 100;
 
 		pControls->put_currentPosition(exactSecond);
 		//CString msg;
@@ -318,7 +333,7 @@ void MusicPLayerDlg::OnTimer(UINT_PTR nIDEvent) {
 
 		if (SUCCEEDED(hr2) && pMedia) {
 			pMedia->get_duration(&duration);
-			activeMusic.setMusicDuration(duration);
+			activeMusic->setMusicDuration(duration);
 			pMedia->Release();
 		}
 		WMPPlayState state;
@@ -331,10 +346,10 @@ void MusicPLayerDlg::OnTimer(UINT_PTR nIDEvent) {
 
 			double musicSeconds = 0;
 			pControls->get_currentPosition(&musicSeconds);
-			activeMusic.SetCurrentMusicTime(musicSeconds);
+			activeMusic->SetCurrentMusicTime(musicSeconds);
 			int sliderPos = 0;
-			if (activeMusic.getMusicDuration() > 0.0) {
-				sliderPos = (int)((musicSeconds / activeMusic.getMusicDuration()) * sliderMax);
+			if (activeMusic->getMusicDuration() > 0.0) {
+				sliderPos = (int)((musicSeconds / activeMusic->getMusicDuration()) * sliderMax);
 			}
 			m_slider.SetPos(sliderPos);
 

@@ -44,16 +44,39 @@ public:
 	}
 	Music() { ; }
 
-	Music(const Music& other)
-		: path(other.path), musicName(other.musicName), timePaused(other.timePaused), index(other.index) {}
-	Music& operator=(const Music& other) {
-		if (this != &other) {
+	Music(const Music&) = delete;
+	Music& operator=(const Music&) = delete;
 
-			path = other.path;
-			musicName = other.musicName;
+	Music(Music&& other) noexcept
+		: path(std::move(other.path)),
+		musicName(std::move(other.musicName)),
+		extension(std::move(other.extension)),
+		timePaused(other.timePaused),
+		currentTimeMusic(other.currentTimeMusic),
+		index(other.index),
+		musicDuration(other.musicDuration),
+		file(std::move(other.file))
+	{
+	}
+	Music& operator=(Music&& other) noexcept
+	{
+		if (this != &other)
+		{
+			path = std::move(other.path);
+
+			musicName = std::move(other.musicName);
+
+			extension = std::move(other.extension);
+
 			timePaused = other.timePaused;
+
+			currentTimeMusic = other.currentTimeMusic;
+
 			index = other.index;
 
+			musicDuration = other.musicDuration;
+
+			file = std::move(other.file);
 		}
 		return *this;
 	}
@@ -66,8 +89,12 @@ public:
 		}
 		return res;
 	}
+	bool setExtension(const std::string & ext) {
+		this->extension = ext;
+		return true;
+	}
 	std::string getExtension() {
-		return this->file->getExtension();
+		return this->extension;
 	}
 
 
@@ -118,6 +145,7 @@ public:
 	}
 	bool loadMusic() {
 		return file->read(path.c_str());
+		return true;
 	}
 	void changeMusicName(std::string data) {
 		file->setTag("TIT2", convertData(data));

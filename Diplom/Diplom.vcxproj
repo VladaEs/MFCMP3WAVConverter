@@ -194,6 +194,7 @@
     <ClInclude Include="Diplom.h" />
     <ClInclude Include="DiplomDoc.h" />
     <ClInclude Include="DiplomView.h" />
+    <ClInclude Include="EditMusicDialog.h" />
     <ClInclude Include="Encoder.h" />
     <ClInclude Include="FData.h" />
     <ClInclude Include="FileSystemController.h" />
@@ -226,6 +227,7 @@
     <ClCompile Include="Diplom.cpp" />
     <ClCompile Include="DiplomDoc.cpp" />
     <ClCompile Include="DiplomView.cpp" />
+    <ClCompile Include="EditMusicDialog.cpp" />
     <ClCompile Include="Encoder.cpp" />
     <ClCompile Include="FData.cpp" />
     <ClCompile Include="FileSystemController.cpp" />

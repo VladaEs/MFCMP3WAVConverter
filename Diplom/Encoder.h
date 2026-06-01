@@ -18,7 +18,7 @@ class Encoder
 {
 private:
 
-	CodecContext config;
+	CodecContext& config = CodecContext::Instance();
 
 	std::vector<Band> bands = config.getBands();
 

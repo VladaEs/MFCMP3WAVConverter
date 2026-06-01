@@ -34,7 +34,6 @@ public:
 		this->path = p;
 		this->musicName = name;
 		this->index = i;
-
 	}
 	Music(std::string p, std::string name, int i) {
 		this->path = p;

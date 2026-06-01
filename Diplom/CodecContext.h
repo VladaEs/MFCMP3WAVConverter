@@ -32,14 +32,19 @@ private:
 	};
 	int Q = 50;
 
-	const int windowSize = 2048;
+	static constexpr int windowSize = 2048;
 	const char extension[4] = { 'M', 'U','X','3' };
 	std::vector<std::vector<float>> cosTable;
 
-public:
-
 	CodecContext() {
 		this->initCosTable(windowSize);
+	}
+
+public:
+	static CodecContext& Instance()
+	{
+		static CodecContext instance;
+		return instance;
 	}
 	std::vector<Band>& getBands() {
 		return bands;
@@ -65,8 +70,7 @@ public:
 	const char* getExtension() const {
 		return extension;
 	}
-	std::vector<std::vector<float>> getCosTable() {
-		
+	std::vector<std::vector<float>>& getCosTable() {
 		return this->cosTable;
 	}
 
@@ -80,7 +84,7 @@ public:
 	}
 
 	void initCosTable(int N) {
-
+		cosTable.clear();
 		cosTable.resize(N, std::vector<float>(2 * N));
 
 		for (int k = 0; k < N; k++) {

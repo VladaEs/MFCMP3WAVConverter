@@ -41,7 +41,7 @@ class FileSystemController {
 			get_files(filesDir, rootDir);
 			return filesDir;
 		}
-		std::vector<std::string> GetPathList() {
+		std::vector<std::string>& GetPathList() {
 			return this->filesDir;
 		}
 

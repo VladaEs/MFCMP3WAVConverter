@@ -44,43 +44,72 @@ public:
 
 		}
 	}
-	MusicController& setRawData(CWnd* parent, std::vector<std::string> dataList) {
+	MusicController& setRawData(CWnd* parent, std::vector<std::string> dataList)
+	{
 		int i = 0;
-		for (const auto& fullPath : dataList) {
-			std::string filename = fs::path(fullPath).stem().string();
-			std::string extension = fs::path(fullPath).extension().string();
-			Music music(parent, fullPath, filename, i);
+
+		for (const auto& fullPath : dataList)
+		{
+			TRACE(_T("\n=== FILE %d ===\n"), i);
+
+			auto t0 = std::chrono::steady_clock::now();
+
+			fs::path p(fullPath);
+
+			auto t1 = std::chrono::steady_clock::now();
+
+			std::string filename = p.stem().string();
+			std::string extension = p.extension().string();
+
+			auto t2 = std::chrono::steady_clock::now();
+
+			Music music(fullPath, filename, i);
+
+			auto t3 = std::chrono::steady_clock::now();
+
 			if (extension == ".mp3")
 			{
 				music.file = std::make_unique<MP3>();
 				music.setExtension("mp3");
-				TRACE(
-					_T("AFTER SET: %S\n"),
-					music.getExtension().c_str()
-				);
 			}
 			else if (extension == ".wav")
 			{
 				music.file = std::make_unique<WAV::WAVFile>();
 				music.setExtension("wav");
-				TRACE(
-					_T("AFTER SET: %S\n"),
-					music.getExtension().c_str()
-				);
 			}
-			else if (extension == ".muc") {
+			else if (extension == ".muc")
+			{
 				music.file = std::make_unique<MUC::MUCFile>();
 				music.setExtension("muc");
 			}
 
-			
+			auto t4 = std::chrono::steady_clock::now();
+
 			MusicCollection.push_back(std::move(music));
-			TRACE(
-				_T("VECTOR EXT: %S\n"),
-				MusicCollection.back().getExtension().c_str()
-			);
+
+			auto t5 = std::chrono::steady_clock::now();
+
+			TRACE(_T("path parse      : %lld ms\n"),
+				std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count());
+
+			TRACE(_T("stem/ext        : %lld ms\n"),
+				std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count());
+
+			TRACE(_T("Music ctor      : %lld ms\n"),
+				std::chrono::duration_cast<std::chrono::milliseconds>(t3 - t2).count());
+
+			TRACE(_T("make_unique     : %lld ms\n"),
+				std::chrono::duration_cast<std::chrono::milliseconds>(t4 - t3).count());
+
+			TRACE(_T("push_back       : %lld ms\n"),
+				std::chrono::duration_cast<std::chrono::milliseconds>(t5 - t4).count());
+
+			TRACE(_T("TOTAL FILE      : %lld ms\n"),
+				std::chrono::duration_cast<std::chrono::milliseconds>(t5 - t0).count());
+
 			++i;
 		}
+
 		return *this;
 	}
 

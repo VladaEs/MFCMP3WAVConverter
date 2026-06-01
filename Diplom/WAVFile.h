@@ -6,7 +6,6 @@
 #include <cmath>
 #include "ConvertedSample.h"
 #include "CodecContext.h"
-#include "CodecContext.h"
 #include "InvMusicFile.h"
 #define M_PI           3.14159265358979323846
 
@@ -63,7 +62,7 @@ namespace WAV {
 	private:
 
 		
-		CodecContext config;
+		CodecContext& config = CodecContext::Instance();
 		const int windowSize = config.getWindowSize();
 		WAV::WavHeader header;
 		int Q = 50; // степень квантования( качество сжатия)

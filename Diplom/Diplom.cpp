@@ -136,6 +136,9 @@ BOOL CDiplomApp::InitInstance()
 	// The one and only window has been initialized, so show and update it
 	m_pMainWnd->ShowWindow(SW_SHOW);
 	m_pMainWnd->UpdateWindow();
+
+	CodecContext::Instance();
+
 	return TRUE;
 }
 

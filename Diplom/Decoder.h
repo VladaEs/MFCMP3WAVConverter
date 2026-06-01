@@ -15,7 +15,7 @@ class Decoder
 {
 
 private: 
-	CodecContext config;
+	CodecContext& config = CodecContext::Instance();
 	
 	std::vector<Band> bands = config.getBands();
 	int windowSize = config.getWindowSize();

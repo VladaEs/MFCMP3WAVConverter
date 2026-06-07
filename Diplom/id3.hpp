@@ -55,7 +55,7 @@ namespace ID3 {
 	};
 
 	// trie with charset of capital letters and numbers
-	//trie::Trie ID3v2::frameTags({ { '0', '9' }, { 'A', 'Z' } });
+	extern trie::Trie frameTags;
 
 	/*
 		utility methods

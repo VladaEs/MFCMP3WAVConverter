@@ -190,6 +190,7 @@
   <ItemGroup>
     <ClInclude Include="ClassView.h" />
     <ClInclude Include="ConvertedSample.h" />
+    <ClInclude Include="ConvertProgressDlg.h" />
     <ClInclude Include="Decoder.h" />
     <ClInclude Include="Diplom.h" />
     <ClInclude Include="DiplomDoc.h" />
@@ -200,6 +201,7 @@
     <ClInclude Include="FileSystemController.h" />
     <ClInclude Include="FileView.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="FrequencyDialog.h" />
     <ClInclude Include="Helpers.hpp" />
     <ClInclude Include="id3.hpp" />
     <ClInclude Include="InvMusicFile.h" />
@@ -223,6 +225,7 @@
     <ClCompile Include="Band.cpp" />
     <ClCompile Include="ClassView.cpp" />
     <ClCompile Include="ConvertedSample.cpp" />
+    <ClCompile Include="ConvertProgressDlg.cpp" />
     <ClCompile Include="Decoder.cpp" />
     <ClCompile Include="Diplom.cpp" />
     <ClCompile Include="DiplomDoc.cpp" />
@@ -232,6 +235,7 @@
     <ClCompile Include="FData.cpp" />
     <ClCompile Include="FileSystemController.cpp" />
     <ClCompile Include="FileView.cpp" />
+    <ClCompile Include="FrequencyDialog.cpp" />
     <ClCompile Include="id3.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="MP3.cpp" />

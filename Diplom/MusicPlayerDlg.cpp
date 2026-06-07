@@ -20,6 +20,7 @@ BEGIN_MESSAGE_MAP(MusicPLayerDlg, CDialogEx)
 	ON_BN_CLICKED(3001, &MusicPLayerDlg::OnBtnclickedPlay)
 	ON_BN_CLICKED(3002, &MusicPLayerDlg::OnBtnclickedPause)
 	ON_BN_CLICKED(3003, &MusicPLayerDlg::OnBtnclickedEdit)
+	ON_BN_CLICKED(3004, &MusicPLayerDlg::OnBtnclickedConvert)
 	//ON_BN_CLICKED(3004, &DrawMusicDialog::OnBtnclickedStop)
 	ON_WM_TIMER()
 	ON_WM_CLOSE()
@@ -61,17 +62,31 @@ BOOL MusicPLayerDlg::OnInitDialog()
 	int buttonWidth = 100;
 	int buttonHeight = 50;
 	int margin = 20;
-	std::vector<std::string> buttonNames = { "Play", "Pause" };
+	std::map<int, std::string> buttonNames =
+{
+    {1, "Play"},
+    {2, "Pause"},
+
+};
 	if (this->activeMusic->extension == "mp3") {
-		buttonNames.push_back("Edit");
+		buttonNames[3] = "Edit";
+	}
+	if (this->activeMusic->extension == "wav") {
+		buttonNames[4] = "Convert";
 	}
 
-	int lastX = 0;
-	for (int i = 0; i < buttonNames.size(); i++) {
+	int lastX = 0; 
+	int i = 0;
+	for (const auto&[id, name] : buttonNames){
 		int x = buttonsStartX + i * (buttonWidth + margin);
 		int y = buttonsStartY;
-		CRect rect(x, y, x + buttonWidth, y + buttonHeight);
-		m_buttons[i].Create(helper.ConvertToCString(buttonNames[i]), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, rect, this, 3001 + i);
+		CRect rect(
+			x,
+			y,
+			x + buttonWidth,
+			y + buttonHeight);
+		m_buttons[i].Create( helper.ConvertToCString(name), WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, rect, this, 3000 + id); // можно использовать id
+		++i;
 	}
 
 	CRect rect;
@@ -89,7 +104,7 @@ BOOL MusicPLayerDlg::OnInitDialog()
 	m_slider.SetTicFreq(1);      // шаг между делени€ми
 
 
-	// init music controlls : 
+	// init music controlls :
 
 	HRESULT hr = CoInitialize(NULL);
 	if (SUCCEEDED(hr)) {
@@ -104,9 +119,6 @@ BOOL MusicPLayerDlg::OnInitDialog()
 			//pSettings->put_repeat(VARIANT_TRUE);
 		}
 	}
-
-
-	// get music Lenght 
 
 
 
@@ -139,7 +151,14 @@ void MusicPLayerDlg::OnPaint()
 	// draw BG
 
 
+	auto& apic = activeMusic->getTag("APIC");
 
+	TRACE("APIC size = %zu\n", apic.size());
+	for (size_t i = 0; i < min(64, apic.size()); ++i)
+	{
+		TRACE("%02X ", (unsigned char)apic[i]);
+	}
+	TRACE("\n");
 	// -=-=-=-=-=-=-=-=-=-=-=-=-=-= draw Image -=-=-=-=-=-=-=-=-=-=-=-=-=-=
 	if (!musicImage.IsNull()) {
 		int imageWidth = 200;
@@ -178,16 +197,16 @@ void MusicPLayerDlg::initMusic(Music *m) {
 	std::string pathWay = activeMusic->GetPath();
 	LoadImageFromMemory(activeMusic->getTag("APIC"), this->musicImage); // creating CImage from std::vector<char> array
 
-
-
-
 }
 
 HRESULT MusicPLayerDlg::LoadImageFromMemory(const std::vector<char>& rawData, CImage& outImage)
 {
 	if (rawData.empty())
 		return E_INVALIDARG;
-
+	if (!outImage.IsNull())
+	{
+		outImage.Destroy();
+	}
 	// --- ѕоиск сигнатуры изображени€ ---
 	const std::vector<std::vector<char>> signatures = {
 		{ '\xFF', '\xD8' },                   // JPEG
@@ -210,7 +229,7 @@ HRESULT MusicPLayerDlg::LoadImageFromMemory(const std::vector<char>& rawData, CI
 	}
 
 	if (found == end) {
-		 AfxMessageBox(L"‘ормат изображени€ не распознан");
+		 //AfxMessageBox(L"‘ормат изображени€ не распознан");
 		return E_FAIL;
 	}
 
@@ -240,8 +259,9 @@ HRESULT MusicPLayerDlg::LoadImageFromMemory(const std::vector<char>& rawData, CI
 
 	// --- «агружаем изображение ---
 	hr = outImage.Load(spStream);
+	//TRACE("CImage::Load hr = 0x%08X\n", hr);
 	if (FAILED(hr) || outImage.IsNull()) {
-		AfxMessageBox(L"Ќе удалось загрузить изображение");
+		 AfxMessageBox(L"Ќе удалось загрузить изображение");
 		return E_FAIL;
 	}
 
@@ -278,7 +298,6 @@ void MusicPLayerDlg::OnBtnclickedPause()
 	{
 		pControls->play();
 	}
-	AfxMessageBox(L"Pause clicked");
 
 }
 
@@ -299,6 +318,15 @@ void MusicPLayerDlg::OnBtnclickedEdit()
 	dlg.DoModal();
 	
 }
+
+
+void MusicPLayerDlg::OnBtnclickedConvert()
+{
+	AfxMessageBox(_T("Hello"));
+	IDD_CONVERTINGPROGRESS
+
+}
+
 
 
 void MusicPLayerDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) {

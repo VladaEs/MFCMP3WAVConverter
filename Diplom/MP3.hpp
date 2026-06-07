@@ -18,7 +18,12 @@ public:
 
 	// default
 	MP3()
-		: hasID3v1(false), hasID3v2(false) {}
+		: hasID3v1(false), hasID3v2(false) {
+		ID3::load();
+	}
+	~MP3() {
+		ID3::clear();
+	}
 
 	/*
 		input output methods
@@ -50,10 +55,7 @@ public:
 		// read data to buffer
 		data = std::vector<char>(fileSize);
 		
-		file.read(
-			data.data(),
-			static_cast<std::streamsize>(fileSize)
-		);
+		file.read(&data[0], fileSize);
 
 		/*
 			check if ID3v2 exists (beginning)
@@ -162,6 +164,12 @@ public:
 	bool eraseTag(std::string tag) {
 		return id3v2Data.erase(tag) != 0;
 	}
+	std::vector<char> getTag(std::string tagName) {
+		if (id3v2Data.find(tagName) == id3v2Data.end()) {
+			return std::vector<char>();
+		}
+		return id3v2Data[tagName];
+	}
 
 	// set tag
 	void setTag(std::string tag, std::vector<char> data) {
@@ -212,9 +220,12 @@ public:
 
 		return true;
 	}
+	/*
 	std::vector<char> getTag(std::string tag) {
 		return id3v2Data[tag];
 	}
+	*/
+
 	// replace range of data
 	bool replaceData(std::string tag, unsigned int startIdx, unsigned int endIdx, std::vector<char> data) {
 		if (id3v2Data.find(tag) == id3v2Data.end()) {

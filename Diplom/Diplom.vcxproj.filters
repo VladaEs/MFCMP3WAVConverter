@@ -115,7 +115,13 @@
       <Filter>Header Files\dialogs</Filter>
     </ClInclude>
     <ClInclude Include="EditMusicDialog.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="FrequencyDialog.h">
+      <Filter>Header Files\dialogs</Filter>
+    </ClInclude>
+    <ClInclude Include="ConvertProgressDlg.h">
+      <Filter>Header Files\dialogs</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -189,7 +195,13 @@
       <Filter>Source Files\dialogs</Filter>
     </ClCompile>
     <ClCompile Include="EditMusicDialog.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="FrequencyDialog.cpp">
+      <Filter>Source Files\dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="ConvertProgressDlg.cpp">
+      <Filter>Source Files\dialogs</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

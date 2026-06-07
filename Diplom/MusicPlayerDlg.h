@@ -27,6 +27,7 @@ public:
 
 	bool setActiveMusic(Music &music) {
 		this->activeMusic = &music;
+		this->initMusic(this->activeMusic);
 		//this->activeMusic.file
 		return true;
 	}
@@ -39,6 +40,7 @@ public:
 	afx_msg void OnBtnclickedPause();
 	afx_msg void OnBtnclickedStop();
 	afx_msg void OnBtnclickedEdit();
+	afx_msg void OnBtnclickedConvert();
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnClose();
 	afx_msg void OnTimer(UINT_PTR nIDEvent);

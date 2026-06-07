@@ -86,7 +86,9 @@
 #define IDS_EDIT_MENU                   306
 #define IDD_MUSIC_PLAYERDLG             310
 #define IDD_MUSICEDITDLG                312
-#define IDC_BUTTON1                     1000
+#define IDD_FREQUENCY                   315
+#define IDD_DIALOG1                     318
+#define IDD_CONVERTINGPROGRESS          318
 #define IDC_CHANGEIMAGE                 1000
 #define IDC_MUSICNAME                   1001
 #define IDC_MUSICAUTHOR                 1002
@@ -96,7 +98,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        314
+#define _APS_NEXT_RESOURCE_VALUE        320
 #define _APS_NEXT_COMMAND_VALUE         32772
 #define _APS_NEXT_CONTROL_VALUE         1003
 #define _APS_NEXT_SYMED_VALUE           310

@@ -7,6 +7,7 @@
 #include "mp3.hpp"
 #include "Music.hpp"
 #include "Helpers.hpp"
+#include "Encoder.h"
 #include <wmp.h>
 
 
@@ -36,8 +37,25 @@ protected:
 	DECLARE_MESSAGE_MAP();
 
 public:
-	std::vector<WAV::ConvertedSample> spectrumData;
+	Music * music;
 
+
+	INT_PTR DoModal() {
+		CDialogEx::DoModal();
+
+		int progress = 0;
+		if (!this->music->loadMusic()) {
+			return 0;
+		}
+		Encoder encoder;
+		if (this->music->getExtension() == "wav") {
+			auto* wav = dynamic_cast<WAV::WAVFile *>(this->music->file.get());
+			if (wav) {
+				encoder.Encode(*wav);
+			}
+		}
+		
+	}
 
 
 
@@ -48,7 +66,12 @@ public:
 		}
 		CDialogEx::OnTimer(nIDEvent);
 	}
-
+	void ConvertProgressDlg::initMusic(Music *m) {
+		this->music = m; 
+		std::string ext = this->music->getExtension();
+		Helpers helper;
+		
+	}
 
 	BOOL OnInitDialog()
 	{

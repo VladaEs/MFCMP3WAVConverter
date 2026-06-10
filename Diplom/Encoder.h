@@ -59,6 +59,7 @@ public:
 		this->processRawData(wav.getData(), wav.getBitsPerSample(), wav.getNumChannels());
 		file.setConvertedData(convertedChunks);
 		file.setCustomHeader(this->prepareCustomHeader(wav));
+		return file;
 	}
 
 

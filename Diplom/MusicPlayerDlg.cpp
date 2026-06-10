@@ -4,6 +4,7 @@
 #include "Helpers.hpp"
 #include "resource.h"
 #include "EditMusicDialog.h"
+#include "ConvertProgressDlg.h"
 #include <algorithm>
 
 IMPLEMENT_DYNAMIC(MusicPLayerDlg, CDialogEx)
@@ -322,8 +323,11 @@ void MusicPLayerDlg::OnBtnclickedEdit()
 
 void MusicPLayerDlg::OnBtnclickedConvert()
 {
+	ConvertProgressDlg dlg;
+	dlg.initMusic(activeMusic);
+	dlg.DoModal();
 	AfxMessageBox(_T("Hello"));
-	IDD_CONVERTINGPROGRESS
+	IDD_CONVERTINGPROGRESS;
 
 }
 

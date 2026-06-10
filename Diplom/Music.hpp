@@ -23,7 +23,7 @@ public:
 	int index;
 	double musicDuration;
 	std::unique_ptr<InvMusicFile> file;
-
+	bool musicLoaded = false;
 
 
 	Music(std::string p, std::string name) {
@@ -143,8 +143,10 @@ public:
 		return true;
 	}
 	bool loadMusic() {
-		return file->read(path.c_str());
-		return true;
+		if (musicLoaded) return true;
+		bool result = file->read(path.c_str());
+		musicLoaded = true;
+		return result;
 	}
 	void changeMusicName(std::string data) {
 		file->setTag("TIT2", convertData(data));

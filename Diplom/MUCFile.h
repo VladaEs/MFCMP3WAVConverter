@@ -44,6 +44,7 @@ class MUCFile: public InvMusicFile
 
 		std::vector<WAV::ConvertedSample> setConvertedData(std::vector<WAV::ConvertedSample>& chunks) {
 			this->convertedData = chunks;
+			return this->convertedData;
 		}
 
 
@@ -106,6 +107,7 @@ class MUCFile: public InvMusicFile
 
 		MUCHeader setCustomHeader(MUCHeader& headerInput) {
 			this->header = headerInput;
+			return this->header;
 		}
 
 

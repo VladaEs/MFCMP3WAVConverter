@@ -4,6 +4,7 @@
 #include <cstring>
 #include <vector>
 #include <cmath>
+#include <functional>
 #include "ConvertedSample.h"
 #include "MUCFile.h"
 #include "WAVFile.h"
@@ -22,7 +23,7 @@ private:
 
 	std::vector<Band> bands = config.getBands();
 
-
+	std::function<void(int)> progressCallback;
 	const int windowSize = config.getWindowSize();
 
 	int Q = config.getQ(); // степень квантования( качество сжатия)
@@ -36,13 +37,13 @@ private:
 	std::vector<std::vector<float>> cosTable = config.getCosTable();
 	const char extension[3] = { 'M', 'U','C' };
 	int currPosition = 0;
-	bool headerSet = false;
+	//bool headerSet = false;
 
 
 
 public:
 	Encoder() {
-		
+		window.resize(windowSize);
 	}
 	Encoder(const std::vector<char>& data, int bitsPerSample, int numChannels) : Encoder() {
 		Encoder();
@@ -55,11 +56,11 @@ public:
 		file.setConvertedData(convertedChunks);
 	}
 	MUC::MUCFile Encode(WAV::WAVFile & wav) {
-		MUC::MUCFile file;
+		MUC::MUCFile fileMUC;
 		this->processRawData(wav.getData(), wav.getBitsPerSample(), wav.getNumChannels());
-		file.setConvertedData(convertedChunks);
-		file.setCustomHeader(this->prepareCustomHeader(wav));
-		return file;
+		fileMUC.setConvertedData(convertedChunks);
+		fileMUC.setCustomHeader(this->prepareCustomHeader(wav));
+		return fileMUC;
 	}
 
 
@@ -68,9 +69,11 @@ public:
 
 
 	bool processRawData(const std::vector<char>& data, int bitsPerSample, int numChannels ) {
+		/*
 		if (headerSet == false) {
 			return false;
 		}
+		*/
 		int max = 0;
 		int min = 0;
 		int bytesPerSample = bitsPerSample / 8;
@@ -97,8 +100,7 @@ public:
 			}
 		}
 
-		std::cout << "min: " << min << "\n";
-		std::cout << "max: " << max << "\n";
+		TRACE("MIN: %d; MAX: %d \n\n\n" , min, max);
 		if (this->convertRawData()) {
 			return true;
 		}
@@ -115,7 +117,8 @@ public:
 		std::vector<int8_t> quantized;
 		std::vector<float> scaleFactors;
 		int loopCounter = 0;
-		for (int pos = 0; pos < samplesLeft.size(); pos += hopSize) {
+		TRACE("left: %d Right: %d", samplesLeft.size(), samplesRight.size());
+		for (int pos = 0; pos + windowSize < samplesLeft.size(); pos += hopSize) {
 			/*
 			if (loopCounter >= 10 && true == true) {
 				std::cout << "break";
@@ -125,18 +128,23 @@ public:
 			spectrum.clear();
 			quantized.clear();
 			scaleFactors.clear();
+			int percent = (100 * pos) / samplesLeft.size();
+			
+			if (progressCallback) {
+				progressCallback(percent);
+			}
 
-			this->encodeFrame(spectrum, quantized, scaleFactors);
+			this->encodeFrame(pos, spectrum, quantized, scaleFactors);
 			loopCounter++;
 
 		}
-		std::cout << "Done";
+		TRACE("COnvert Raw Data Done");
 		return true;
 	}
 
 
-	void encodeFrame(std::vector<float> &spectrum, std::vector<int8_t> &quantized, std::vector<float> scaleFactors) {
-		this->handleHannWindow();
+	void encodeFrame(size_t currPos,  std::vector<float> &spectrum, std::vector<int8_t> &quantized, std::vector<float> scaleFactors) {
+		this->handleHannWindow(currPos);
 
 
 		this->MDCT(window, spectrum);
@@ -145,16 +153,20 @@ public:
 		this->quantization(spectrum, quantized, scaleFactors);
 		this->convertedChunks.push_back(WAV::ConvertedSample().setConvertedChunk(quantized).setScaleFactors(scaleFactors));
 	}
+	void setProgressCallback( std::function<void(int)> cb){
+		progressCallback = cb;
+	}
 
 
-
-	void handleHannWindow() {
-		this->fillWindow();
+	void handleHannWindow(size_t pos) {
+		this->fillWindow(pos);
 		this->fillHannWindowValues();
 		this->applyHannWindow();
 	}
 	void fillWindow(int currPos = 0) {
-
+		TRACE(
+			"window size = %zu\n",
+			window.size());
 		for (int i = 0; i < windowSize; i++) {
 
 			int idx = currPos + i;
@@ -168,8 +180,9 @@ public:
 			float r = samplesRight[idx];
 
 			window[i] = 0.5f * (l + r);
+			TRACE("\nWindow value: %f\n", window[i]);
 		}
-		std::cout << "Window\n";
+		TRACE("Window\n");
 		for (int i = 0; i < windowSize; i++) {
 			std::cout << window[i] << "\n";
 		}

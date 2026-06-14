@@ -3,8 +3,11 @@
 #include <string>
 #include <vector>
 #include <fstream>
+#include <filesystem>
 #include "ConvertedSample.h";
 #include "InvMusicFile.h" 
+
+
 
 namespace MUC {
 
@@ -41,6 +44,8 @@ class MUCFile: public InvMusicFile
 		std::vector<char> data;
 
 	public:
+		std::string getPlayableURL(std::string path) override;
+
 
 		std::vector<WAV::ConvertedSample> setConvertedData(std::vector<WAV::ConvertedSample>& chunks) {
 			this->convertedData = chunks;
@@ -104,9 +109,11 @@ class MUCFile: public InvMusicFile
 
 
 		}
-
+		
+		
 		MUCHeader setCustomHeader(MUCHeader& headerInput) {
 			this->header = headerInput;
+			headerSet = true;
 			return this->header;
 		}
 
@@ -121,6 +128,7 @@ class MUCFile: public InvMusicFile
 
 
 		bool play() {
+			TRACE("ENTER custom Play method");
 			return true;
 		}
 

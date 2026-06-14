@@ -118,6 +118,9 @@ public:
 
 		return true;
 	}
+	std::string getPlayableURL(std::string path) {
+		return path;
+	}
 	std::string getExtension() {
 		return ".mp3";
 	}

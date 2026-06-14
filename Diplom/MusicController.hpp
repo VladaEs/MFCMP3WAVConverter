@@ -47,7 +47,7 @@ public:
 	MusicController& setRawData(CWnd* parent, std::vector<std::string> dataList)
 	{
 		int i = 0;
-
+		MusicCollection.clear();
 		for (const auto& fullPath : dataList)
 		{
 			TRACE(_T("\n=== FILE %d ===\n"), i);

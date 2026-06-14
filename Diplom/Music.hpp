@@ -129,6 +129,14 @@ public:
 	int GetTimePaused() {
 		return this->timePaused;
 	}
+	std::string getPlayableURL() {
+		TRACE("\nPLAYABLE URL\n");
+		TRACE(path.c_str());
+		TRACE("\nendofLine");
+		std::string URL = this->file->getPlayableURL(path);
+		TRACE(URL.c_str());
+		return URL;
+	}
 	std::string GetPath() {
 		return this->path;
 	}

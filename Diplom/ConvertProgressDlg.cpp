@@ -9,9 +9,9 @@
 IMPLEMENT_DYNAMIC(ConvertProgressDlg, CDialogEx)
 
 ConvertProgressDlg::ConvertProgressDlg(CWnd* pParent)
+	: CDialogEx(IDD_CONVERTINGPROGRESS, pParent)
 {
 }
-
 
 
 BEGIN_MESSAGE_MAP(ConvertProgressDlg, CDialogEx)

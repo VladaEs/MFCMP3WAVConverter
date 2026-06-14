@@ -26,10 +26,16 @@ private:
 	std::vector<int16_t> normalisedPCM;
 public:
 
-	MUC::MUCFile Decode(MUC::MUCFile& muc) {
+	WAV::WAVFile Decoder::decodeFile(MUC::MUCFile& muc)
+	{
 		WAV::WAVFile wav;
 		convertedChunks = muc.getConvertedChunks();
+		decode(convertedChunks);
+		
+		wav.setHeader(muc.getSampleRate(), muc.getChannels(), muc.getBitsPerSample());
 
+		wav.setPCM(normalisedPCM);
+		return wav;
 	}
 
 	bool decode(std::vector<WAV::ConvertedSample> &chunks) {
@@ -56,7 +62,7 @@ public:
 			if (s > 1.0f) s = 1.0f;
 			if (s < -1.0f) s = -1.0f;
 
-			int16_t normPCM = (int16_t)(pcm[i] * 32767.0f);
+			int16_t normPCM = (int16_t)(s * 32767.0f);
 			this->normalisedPCM[i] = normPCM;
 		}
 

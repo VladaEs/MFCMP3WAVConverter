@@ -137,15 +137,42 @@ namespace WAV {
 		bool write(const char* path) {
 			this->recalcHeaderSize();
 
-			std::ofstream file(path, std::ios::out | std::ios::binary | std::ios::ate);
+			std::ofstream file(path, std::ios::out | std::ios::binary | std::ios::trunc);
 			if (!file.is_open()) {
 				return false;
 			}
-			//file.write(reinterpret_cast<char *>(&header), sizeof(WAV::CompressedWavHeader));
+			file.write(reinterpret_cast<char *>(&header), sizeof(WAV::WavHeader));
 
-			file.write(&data[0], data.size());
+			if (!data.empty())
+			{
+				file.write(data.data(), data.size());
+			}
+			return true;
 		}
 
+
+		WAV::WAVFile& setHeader( uint32_t sampleRate, uint16_t channels, uint16_t bitsPerSample){
+			memcpy(header.chunk_id, "RIFF", 4);
+			memcpy(header.format, "WAVE", 4);
+
+			memcpy(header.subchunk1_id, "fmt ", 4);
+			memcpy(header.subchunk2_id, "data", 4);
+
+			header.subchunk1_size = 16;
+			header.subchunk1_format = 1;
+
+			header.sample_rate = sampleRate;
+			header.num_channels = channels;
+			header.bits_per_sample = bitsPerSample;
+
+			header.block_align =
+				channels * (bitsPerSample / 8);
+
+			header.byte_rate =
+				sampleRate * header.block_align;
+
+			return *this;
+		}
 
 		WAV::WAVFile & setSaveFileName(std::string name) {
 			this->fileName = name;
@@ -160,25 +187,58 @@ namespace WAV {
 		WAV::WavHeader & getHeader() {
 			return this->header;
 		}
-		void viewHeaders() {
-			std::cout << header.bits_per_sample << "\n";
-			std::cout << header.block_align << "\n";
-			std::cout << header.byte_rate << "\n";
-			std::cout << header.chunk_id << "\n";
-			std::cout << header.chunk_size << "\n";
-			std::cout << header.format << "\n";
-			std::cout << header.num_channels << "\n";
-			std::cout << header.sample_rate << "\n";
-			std::cout << header.subchunk1_format << "\n";
-			std::cout << header.subchunk1_id << "\n";
-			std::cout << header.subchunk1_size << "\n";
-			std::cout << header.subchunk2_id << "\n";
-			std::cout << header.subchunk2_size << "\n";
+		void viewHeaders()
+		{
+			TRACE("bits_per_sample : %d\n", header.bits_per_sample);
+			TRACE("block_align     : %d\n", header.block_align);
+			TRACE("byte_rate       : %u\n", header.byte_rate);
+
+			TRACE("chunk_id        : %.4s\n", header.chunk_id);
+			TRACE("chunk_size      : %u\n", header.chunk_size);
+
+			TRACE("format          : %.4s\n", header.format);
+
+			TRACE("num_channels    : %d\n", header.num_channels);
+			TRACE("sample_rate     : %u\n", header.sample_rate);
+
+			TRACE("subchunk1_format: %u\n", header.subchunk1_format);
+
+			TRACE("subchunk1_id    : %.4s\n", header.subchunk1_id);
+			TRACE("subchunk1_size  : %u\n", header.subchunk1_size);
+
+			TRACE("subchunk2_id    : %.4s\n", header.subchunk2_id);
+			TRACE("subchunk2_size  : %u\n", header.subchunk2_size);
 		}
-		WAVFile* recalcHeaderSize() {
+		WAVFile* recalcHeaderSize()
+		{
+			header.subchunk2_size =
+				static_cast<uint32_t>(data.size());
+
+			header.chunk_size =
+				36 + header.subchunk2_size;
+
+			header.block_align =
+				header.num_channels *
+				(header.bits_per_sample / 8);
+
+			header.byte_rate =
+				header.sample_rate *
+				header.block_align;
 
 			return this;
 		}
+
+		void setPCM( const std::vector<int16_t>& pcm) {
+			data.resize( pcm.size() * sizeof(int16_t));
+			memcpy( data.data(), pcm.data(), data.size());
+
+		}
+
+		std::string getPlayableURL(std::string path) { // used in misucPlayerDlg
+			viewHeaders();
+			return path;
+		}
+
 		bool play() {
 			return true;
 		}

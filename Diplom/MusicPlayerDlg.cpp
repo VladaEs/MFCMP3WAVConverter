@@ -111,7 +111,7 @@ BOOL MusicPLayerDlg::OnInitDialog()
 	if (SUCCEEDED(hr)) {
 		hr = CoCreateInstance(__uuidof(WindowsMediaPlayer), NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&pPlayer));
 		if (SUCCEEDED(hr)) {
-			CString musicPath = helper.ConvertToCString(activeMusic->GetPath());
+			CString musicPath = helper.ConvertToCString(activeMusic->getPlayableURL());
 			BSTR bstrFile = SysAllocString(musicPath);
 			pPlayer->put_URL(bstrFile);
 			SysFreeString(bstrFile);
@@ -120,8 +120,6 @@ BOOL MusicPLayerDlg::OnInitDialog()
 			//pSettings->put_repeat(VARIANT_TRUE);
 		}
 	}
-
-
 
 	// init timer
 
@@ -202,8 +200,15 @@ void MusicPLayerDlg::initMusic(Music *m) {
 
 HRESULT MusicPLayerDlg::LoadImageFromMemory(const std::vector<char>& rawData, CImage& outImage)
 {
-	if (rawData.empty())
-		return E_INVALIDARG;
+	if (rawData.empty()) {
+		TRACE("Showing Default one\n");
+		CString dir(
+			std::filesystem::current_path().wstring().c_str());
+
+		TRACE(_T("Current dir: %s\n"), dir.GetString());
+		outImage.Load(L"Debug/images/default.jpg");
+		return S_OK;
+	}
 	if (!outImage.IsNull())
 	{
 		outImage.Destroy();
@@ -259,9 +264,12 @@ HRESULT MusicPLayerDlg::LoadImageFromMemory(const std::vector<char>& rawData, CI
 	}
 
 	// --- Загружаем изображение ---
+	
 	hr = outImage.Load(spStream);
 	//TRACE("CImage::Load hr = 0x%08X\n", hr);
 	if (FAILED(hr) || outImage.IsNull()) {
+		TRACE("\nFAILED TO LOAD IMAGE\n");
+		outImage.Load(L"images/default.jpg");
 		 AfxMessageBox(L"Не удалось загрузить изображение");
 		return E_FAIL;
 	}
@@ -274,15 +282,16 @@ void MusicPLayerDlg::OnClose() {
 }
 void MusicPLayerDlg::OnBtnclickedPlay()
 {
-	WMPPlayState state;
-	pPlayer->get_playState(&state);
-	if (state == wmppsPlaying) {
-		pControls->pause();
+	if (activeMusic->getExtension() != ".muc") {
+		WMPPlayState state;
+		pPlayer->get_playState(&state);
+		if (state == wmppsPlaying) {
+			pControls->pause();
+		}
+		else if (state == wmppsPaused || state == wmppsStopped) {
+			pControls->play();
+		}
 	}
-	else if (state == wmppsPaused || state == wmppsStopped) {
-		pControls->play();
-	}
-
 	//pControls->play();
 	//pControls->Release();
 }

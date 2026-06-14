@@ -19,6 +19,7 @@ public:
 	virtual ~InvMusicFile() = default;
 	virtual bool play() = 0 ;
 	virtual bool pause() = 0;
+	virtual std::string getPlayableURL (std::string path) = 0;
 	
 };
 

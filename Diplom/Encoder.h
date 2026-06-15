@@ -56,10 +56,45 @@ public:
 		file.setConvertedData(convertedChunks);
 	}
 	MUC::MUCFile Encode(WAV::WAVFile & wav) {
+		auto totalStart =
+			std::chrono::steady_clock::now();
 		MUC::MUCFile fileMUC;
+		auto t1 =
+			std::chrono::steady_clock::now();
 		this->processRawData(wav.getData(), wav.getBitsPerSample(), wav.getNumChannels());
+		auto t2 =
+			std::chrono::steady_clock::now();
 		fileMUC.setConvertedData(convertedChunks);
+		auto t3 =
+			std::chrono::steady_clock::now();
 		fileMUC.setCustomHeader(this->prepareCustomHeader(wav));
+		auto t4 =
+			std::chrono::steady_clock::now();
+
+
+		TRACE(
+			"processRawData   : %lld ms\n",
+			std::chrono::duration_cast<
+			std::chrono::milliseconds>(
+				t2 - t1).count());
+
+		TRACE(
+			"setConvertedData : %lld ms\n",
+			std::chrono::duration_cast<
+			std::chrono::milliseconds>(
+				t3 - t2).count());
+
+		TRACE(
+			"prepareHeader    : %lld ms\n",
+			std::chrono::duration_cast<
+			std::chrono::milliseconds>(
+				t4 - t3).count());
+
+		TRACE(
+			"TOTAL ENCODE     : %lld ms\n",
+			std::chrono::duration_cast<
+			std::chrono::milliseconds>(
+				t4 - totalStart).count());
 		return fileMUC;
 	}
 
@@ -86,7 +121,7 @@ public:
 				for (int b = 0; b < bytesPerSample; b++) {
 					sample |= static_cast<uint8_t>(data[offset + b]) << (8 * b);
 				}
-				int shift = 32 - numChannels;
+				int shift = 32 - bitsPerSample;
 				sample = (sample << shift) >> shift;
 				if (sample > max) max = sample;
 				if (sample < min) min = sample;

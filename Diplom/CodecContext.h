@@ -34,10 +34,10 @@ private:
 
 	static constexpr int windowSize = 2048;
 	const char extension[4] = { 'M', 'U','X','3' };
-	std::vector<std::vector<float>> cosTable;
+	std::vector<float> cosTable;
 
 	CodecContext() {
-		this->initCosTable(windowSize);
+		this->initCosTable(windowSize / 2);
 	}
 
 public:
@@ -70,7 +70,7 @@ public:
 	const char* getExtension() const {
 		return extension;
 	}
-	std::vector<std::vector<float>>& getCosTable() {
+	std::vector<float>& getCosTable() {
 		return this->cosTable;
 	}
 
@@ -85,16 +85,15 @@ public:
 
 	void initCosTable(int N) {
 		cosTable.clear();
-		cosTable.resize(N, std::vector<float>(2 * N));
-
-		for (int k = 0; k < N; k++) {
-			for (int n = 0; n < 2 * N; n++) {
-
+		cosTable.resize(N * 2 * N);
+		for (int k = 0; k < N; k++)
+		{
+			for (int n = 0; n < 2 * N; n++)
+			{
 				float angle = M_PI / N *
 					(n + 0.5f + N / 2.0f) *
 					(k + 0.5f);
-
-				cosTable[k][n] = cosf(angle);
+				cosTable[k * (2 * N) + n] = cosf(angle);
 			}
 		}
 	}

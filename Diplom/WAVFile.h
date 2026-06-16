@@ -74,7 +74,6 @@ namespace WAV {
 		std::vector<float> hannWindow;
 		std::vector<ConvertedSample> convertedChunks;
 		std::string fileName;
-		//std::vector<std::vector<float>> cosTable = config.getCosTable();
 		const char extension[4] = { 'M', 'U','X','3' };
 		int currPosition = 0;
 		bool headerSet = false;

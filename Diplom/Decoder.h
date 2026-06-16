@@ -20,7 +20,7 @@ private:
 	std::vector<Band> bands = config.getBands();
 	int windowSize = config.getWindowSize();
 	std::vector<WAV::ConvertedSample> convertedChunks;
-	std::vector<std::vector<float>> cosTable = config.getCosTable();
+	std::vector<float> cosTable = config.getCosTable();
 
 	std::vector<float> decodedPCM;
 	std::vector<int16_t> normalisedPCM;
@@ -30,11 +30,14 @@ public:
 	{
 		WAV::WAVFile wav;
 		convertedChunks = muc.getConvertedChunks();
+		TRACE("Frames loaded = %zu\n", convertedChunks.size());
 		decode(convertedChunks);
-		
+		TRACE("decodedPCM size = %zu\n", decodedPCM.size());
+		TRACE("normalisedPCM size = %zu\n", normalisedPCM.size());
 		wav.setHeader(muc.getSampleRate(), muc.getChannels(), muc.getBitsPerSample());
-
+		wav.viewHeaders();
 		wav.setPCM(normalisedPCM);
+		TRACE("PCM bytes = %zu\n", wav.getData().size());
 		return wav;
 	}
 
@@ -70,19 +73,33 @@ public:
 	}
 
 	std::vector<float> decodeFrame(WAV::ConvertedSample &chunk) {
+
 		std::vector<float>IMDCTPrepared = this->dequantization(chunk, config.getQ());
 		std::vector<float>result = this->IMDCT(IMDCTPrepared);
 		return result;
 	}
 	// goes second
-	std::vector<float> IMDCT(std::vector<float> &input){
-		std::vector<float> res(windowSize);
-		for (int n = 0; n < windowSize; n++) {
-			float sum = 0;
+	std::vector<float> IMDCT(std::vector<float>& input)
+	{
+		int N = static_cast<int>(input.size());
 
-			for (int k = 0; k < input.size(); k++) {
-				sum += input[k] * this->cosTable[k][n];
+		std::vector<float> res(windowSize);
+
+		const float* in = input.data();
+		const float* table = cosTable.data();
+
+		for (int n = 0; n < windowSize; n++)
+		{
+			float sum = 0.0f;
+
+			for (int k = 0; k < N; k++)
+			{
+				const float* row =
+					table + k * windowSize;
+
+				sum += in[k] * row[n];
 			}
+
 			res[n] = sum;
 		}
 

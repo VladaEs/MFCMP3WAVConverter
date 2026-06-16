@@ -34,7 +34,7 @@ private:
 
 	std::vector<float> hannWindow;
 	std::vector<WAV::ConvertedSample> convertedChunks;
-	std::vector<std::vector<float>> cosTable = config.getCosTable();
+	std::vector<float> cosTable = config.getCosTable();
 	const char extension[3] = { 'M', 'U','C' };
 	int currPosition = 0;
 	//bool headerSet = false;
@@ -56,45 +56,18 @@ public:
 		file.setConvertedData(convertedChunks);
 	}
 	MUC::MUCFile Encode(WAV::WAVFile & wav) {
-		auto totalStart =
-			std::chrono::steady_clock::now();
 		MUC::MUCFile fileMUC;
-		auto t1 =
-			std::chrono::steady_clock::now();
+		TRACE("Original data size = %zu\n", wav.getData().size());
+		TRACE("Sample rate = %d\n", wav.getSampleRate());
+		TRACE("Channels = %d\n", wav.getNumChannels());
+		TRACE("Bits = %d\n", wav.getBitsPerSample());
+
 		this->processRawData(wav.getData(), wav.getBitsPerSample(), wav.getNumChannels());
-		auto t2 =
-			std::chrono::steady_clock::now();
+		TRACE("Left samples  = %zu\n", samplesLeft.size());
+		TRACE("Right samples = %zu\n", samplesRight.size());
 		fileMUC.setConvertedData(convertedChunks);
-		auto t3 =
-			std::chrono::steady_clock::now();
+		TRACE("Frames encoded = %zu\n", convertedChunks.size());
 		fileMUC.setCustomHeader(this->prepareCustomHeader(wav));
-		auto t4 =
-			std::chrono::steady_clock::now();
-
-
-		TRACE(
-			"processRawData   : %lld ms\n",
-			std::chrono::duration_cast<
-			std::chrono::milliseconds>(
-				t2 - t1).count());
-
-		TRACE(
-			"setConvertedData : %lld ms\n",
-			std::chrono::duration_cast<
-			std::chrono::milliseconds>(
-				t3 - t2).count());
-
-		TRACE(
-			"prepareHeader    : %lld ms\n",
-			std::chrono::duration_cast<
-			std::chrono::milliseconds>(
-				t4 - t3).count());
-
-		TRACE(
-			"TOTAL ENCODE     : %lld ms\n",
-			std::chrono::duration_cast<
-			std::chrono::milliseconds>(
-				t4 - totalStart).count());
 		return fileMUC;
 	}
 
@@ -109,6 +82,7 @@ public:
 			return false;
 		}
 		*/
+		int debugCounter = 0;
 		int max = 0;
 		int min = 0;
 		int bytesPerSample = bitsPerSample / 8;
@@ -123,6 +97,17 @@ public:
 				}
 				int shift = 32 - bitsPerSample;
 				sample = (sample << shift) >> shift;
+
+				int rawSample = sample;
+				if (debugCounter < 20)
+				{
+					TRACE(
+						"raw=%d signed=%d\n",
+						rawSample,
+						sample);
+
+					debugCounter++;
+				}
 				if (sample > max) max = sample;
 				if (sample < min) min = sample;
 				if (ch == 0) {
@@ -136,6 +121,27 @@ public:
 		}
 
 		TRACE("MIN: %d; MAX: %d \n\n\n" , min, max);
+		TRACE("MIN: %d; MAX: %d \n", min, max);
+
+		TRACE("\n===== START =====\n");
+		for (int i = 0; i < 10; i++)
+		{
+			TRACE("%f\n", samplesLeft[i]);
+		}
+
+		TRACE("\n===== MIDDLE =====\n");
+		int mid = (int)samplesLeft.size() / 2;
+		for (int i = 0; i < 10; i++)
+		{
+			TRACE("%f\n", samplesLeft[mid + i]);
+		}
+
+		TRACE("\n===== END =====\n");
+		int end = (int)samplesLeft.size() - 10;
+		for (int i = 0; i < 10; i++)
+		{
+			TRACE("%f\n", samplesLeft[end + i]);
+		}
 		if (this->convertRawData()) {
 			return true;
 		}
@@ -178,15 +184,45 @@ public:
 	}
 
 
-	void encodeFrame(size_t currPos,  std::vector<float> &spectrum, std::vector<int8_t> &quantized, std::vector<float> scaleFactors) {
+	void encodeFrame(
+		size_t currPos,
+		std::vector<float>& spectrum,
+		std::vector<int8_t>& quantized,
+		std::vector<float>& scaleFactors)
+	{
+		auto t0 = std::chrono::steady_clock::now();
+
 		this->handleHannWindow(currPos);
 
+		auto t1 = std::chrono::steady_clock::now();
 
 		this->MDCT(window, spectrum);
 
+		auto t2 = std::chrono::steady_clock::now();
+		
+		this->quantization( spectrum, quantized, scaleFactors);
+			
 
-		this->quantization(spectrum, quantized, scaleFactors);
-		this->convertedChunks.push_back(WAV::ConvertedSample().setConvertedChunk(quantized).setScaleFactors(scaleFactors));
+		auto t3 = std::chrono::steady_clock::now();
+
+		this->convertedChunks.push_back(
+			WAV::ConvertedSample()
+			.setConvertedChunk(quantized)
+			.setScaleFactors(scaleFactors));
+
+		auto t4 = std::chrono::steady_clock::now();
+		/*
+		TRACE(
+			"hann=%lld ms mdct=%lld ms quant=%lld ms push=%lld ms\n",
+			std::chrono::duration_cast<
+			std::chrono::milliseconds>(t1 - t0).count(),
+			std::chrono::duration_cast<
+			std::chrono::milliseconds>(t2 - t1).count(),
+			std::chrono::duration_cast<
+			std::chrono::milliseconds>(t3 - t2).count(),
+			std::chrono::duration_cast<
+			std::chrono::milliseconds>(t4 - t3).count());
+			*/
 	}
 	void setProgressCallback( std::function<void(int)> cb){
 		progressCallback = cb;
@@ -199,9 +235,7 @@ public:
 		this->applyHannWindow();
 	}
 	void fillWindow(int currPos = 0) {
-		TRACE(
-			"window size = %zu\n",
-			window.size());
+
 		for (int i = 0; i < windowSize; i++) {
 
 			int idx = currPos + i;
@@ -215,9 +249,7 @@ public:
 			float r = samplesRight[idx];
 
 			window[i] = 0.5f * (l + r);
-			TRACE("\nWindow value: %f\n", window[i]);
 		}
-		TRACE("Window\n");
 		for (int i = 0; i < windowSize; i++) {
 			std::cout << window[i] << "\n";
 		}
@@ -251,22 +283,37 @@ public:
 	// transform (time, value) to (frenquency)
 // result is an array of input.size()/2
 // i can use the output to show graph in openGL
-	void MDCT(std::vector<float>& input, std::vector<float>& output) {
-		int N = input.size() / 2;
-		std::cout << "MDCT\n";
-		for (int i = 0; i < input.size(); i++) {
-			std::cout << input[i] << "\n";
+	void MDCT(std::vector<float>& input, std::vector<float>& output)
+	{
+		int N = static_cast<int>(input.size()) / 2;
+
+		if (cosTable.size() < N * (2 * N))
+		{
+			TRACE("ERROR: cosTable too small!\n");
+			return;
 		}
-		//system("pause");
+
 		output.resize(N);
 
-		for (int k = 0; k < N; k++) {
+		const float* in = input.data();
+
+
+		for (int k = 0; k < N; k++)
+		{
 			float sum = 0.0f;
-			for (int n = 0; n < 2 * N; n++) {
-				sum += input[n] * cosTable[k][n];
+
+			const float* row =
+				&cosTable[k * (2 * N)];
+
+			for (int n = 0; n < 2 * N; n++)
+			{
+				sum += in[n] * row[n];
 			}
+
 			output[k] = sum;
 		}
+	
+
 	}
 	// quantization
 	// 1 - split output from MDCT into bands and quant them separetely
@@ -347,9 +394,10 @@ public:
 	}
 
 	MUC::MUCHeader prepareCustomHeader(WAV::WAVFile &wav) {
+		int numChanels = 1; // we are converting to mono so sohuld always set it to 1
 		MUC::MUCHeader header;
 		header.sample_rate = wav.getSampleRate();
-		header.channels = wav.getNumChannels();
+		header.channels = numChanels; 
 		header.bits_per_sample = wav.getBitsPerSample();
 		header.window_size = this->windowSize;
 		header.total_frames = convertedChunks.size();

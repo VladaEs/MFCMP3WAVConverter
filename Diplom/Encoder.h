@@ -5,6 +5,7 @@
 #include <vector>
 #include <cmath>
 #include <functional>
+#include <algorithm>
 #include "ConvertedSample.h"
 #include "MUCFile.h"
 #include "WAVFile.h"
@@ -63,6 +64,7 @@ public:
 		TRACE("Bits = %d\n", wav.getBitsPerSample());
 
 		this->processRawData(wav.getData(), wav.getBitsPerSample(), wav.getNumChannels());
+		TestMDCT();
 		TRACE("Left samples  = %zu\n", samplesLeft.size());
 		TRACE("Right samples = %zu\n", samplesRight.size());
 		fileMUC.setConvertedData(convertedChunks);
@@ -72,8 +74,106 @@ public:
 	}
 
 
+	std::vector<float> IMDCT(std::vector<float>& input)
+	{
+		int N = static_cast<int>(input.size());
 
+		std::vector<float> res(windowSize);
 
+		const float* in = input.data();
+		const float* table = cosTable.data();
+
+		for (int n = 0; n < windowSize; n++)
+		{
+			float sum = 0.0f;
+
+			for (int k = 0; k < N; k++)
+			{
+				const float* row =
+					table + k * windowSize;
+
+				sum += in[k] * row[n];
+			}
+
+			res[n] = sum;
+		}
+
+		return res;
+	}
+	void TestMDCT()
+	{
+		fillWindow(0);
+
+		std::vector<float> spectrum;
+		MDCT(window, spectrum);
+
+		std::vector<float> restored =
+			IMDCT(spectrum);
+
+		TRACE("\n===== MDCT TEST =====\n");
+
+		float inMin = FLT_MAX;
+		float inMax = -FLT_MAX;
+
+		for (float v : window)
+		{
+			if (v < inMin) inMin = v;
+			if (v > inMax) inMax = v;
+		}
+
+		float outMin = FLT_MAX;
+		float outMax = -FLT_MAX;
+
+		for (float v : restored)
+		{
+			if (v < outMin) outMin = v;
+			if (v > outMax) outMax = v;
+		}
+
+		TRACE(
+			"INPUT RANGE  = %f .. %f\n",
+			inMin,
+			inMax);
+
+		TRACE(
+			"OUTPUT RANGE = %f .. %f\n",
+			outMin,
+			outMax);
+
+		TRACE("\n===== FIRST 20 SAMPLES =====\n");
+
+		for (int i = 0; i < 20; i++)
+		{
+			TRACE(
+				"%d: in=%f out=%f\n",
+				i,
+				window[i],
+				restored[i]);
+		}
+
+		double mse = 0.0;
+
+		size_t count = window.size();
+
+		if (restored.size() < count)
+		{
+			count = restored.size();
+		}
+
+		for (size_t i = 0; i < count; i++)
+		{
+			double diff = window[i] - restored[i];
+			mse += diff * diff;
+		}
+		mse /= window.size();
+
+		TRACE(
+			"\nMSE = %f\n",
+			mse);
+
+		TRACE(
+			"=====================\n");
+	}
 
 
 	bool processRawData(const std::vector<char>& data, int bitsPerSample, int numChannels ) {
@@ -198,10 +298,41 @@ public:
 
 		this->MDCT(window, spectrum);
 
+		float mn = FLT_MAX;
+		float mx = -FLT_MAX;
+
+		for (float v : spectrum)
+		{
+			if (v < mn) mn = v;
+			if (v > mx) mx = v;
+		}
+
+		TRACE(
+			"MDCT range: %f .. %f\n",
+			mn,
+			mx);
+
+
 		auto t2 = std::chrono::steady_clock::now();
 		
 		this->quantization( spectrum, quantized, scaleFactors);
-			
+
+		int qMin = 127;
+		int qMax = -127;
+
+		for (int8_t v : quantized)
+		{
+			if ((int)v < qMin)
+				qMin = (int)v;
+
+			if ((int)v > qMax)
+				qMax = (int)v;
+		}
+
+		TRACE(
+			"QUANT range: %d .. %d\n",
+			qMin,
+			qMax);
 
 		auto t3 = std::chrono::steady_clock::now();
 
@@ -258,7 +389,7 @@ public:
 	void applyHannWindow() {
 
 		for (int i = 0; i < windowSize; i++) {
-			window[i] *= hannWindow[i];
+			window[i] *= sqrtf(hannWindow[i]);
 		}
 	}
 	// hann window creation

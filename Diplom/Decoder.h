@@ -16,7 +16,7 @@ class Decoder
 
 private: 
 	CodecContext& config = CodecContext::Instance();
-	
+	std::vector<float> hannWindow;
 	std::vector<Band> bands = config.getBands();
 	int windowSize = config.getWindowSize();
 	std::vector<WAV::ConvertedSample> convertedChunks;
@@ -28,6 +28,7 @@ public:
 
 	WAV::WAVFile Decoder::decodeFile(MUC::MUCFile& muc)
 	{
+		fillHannWindowValues();
 		WAV::WAVFile wav;
 		convertedChunks = muc.getConvertedChunks();
 		TRACE("Frames loaded = %zu\n", convertedChunks.size());
@@ -76,6 +77,10 @@ public:
 
 		std::vector<float>IMDCTPrepared = this->dequantization(chunk, config.getQ());
 		std::vector<float>result = this->IMDCT(IMDCTPrepared);
+		for (int i = 0; i < windowSize; i++)
+		{
+			result[i] *= sqrtf(hannWindow[i]);
+		}
 		return result;
 	}
 	// goes second
@@ -100,7 +105,7 @@ public:
 				sum += in[k] * row[n];
 			}
 
-			res[n] = sum;
+			res[n] = sum * (2.0f / N);
 		}
 
 		return res;
@@ -124,6 +129,24 @@ public:
 
 		return res;
 	}
+
+
+	void fillHannWindowValues()
+	{
+		hannWindow.clear();
+
+		float factor =
+			2.0f * M_PI / (windowSize - 1);
+
+		for (int i = 0; i < windowSize; i++)
+		{
+			float w =
+				0.5f * (1.0f - cos(factor * i));
+
+			hannWindow.push_back(w);
+		}
+	}
+
 
 };
 

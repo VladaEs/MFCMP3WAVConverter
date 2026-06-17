@@ -3,6 +3,7 @@
 #include <afxwin.h>
 #include <wmp.h>
 #include "Music.hpp";
+#include "Encoder.h"
 class MusicPLayerDlg : public CDialogEx
 {
 
@@ -12,14 +13,18 @@ public:
 	CImage musicImage;
 	CButton m_buttons[4]; // start, stop, pause, edit btns
 	CSliderCtrl m_slider;
-
-
+	CRect spectrumRect;
+	Encoder encoder;
 
 	IWMPPlayer* pPlayer = nullptr;
 	IWMPControls* pControls = nullptr;
 	IWMPSettings *pSettings = nullptr;
 
+
+	std::vector<float> currentSpectrum;
+
 	HRESULT LoadImageFromMemory(const std::vector<char>& imageData, CImage& outImage);
+	void DrawSpectrum(CDC& dc, const CRect& rect);
 	void MusicPLayerDlg::initMusic(Music *m);
 	MusicPLayerDlg(CWnd* pParent = nullptr);
 	virtual ~MusicPLayerDlg();

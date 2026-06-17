@@ -9,7 +9,7 @@
 IMPLEMENT_DYNAMIC(FrequencyDlg, CDialogEx)
 
 FrequencyDlg::FrequencyDlg(CWnd* pParent)
-	: CDialogEx(IDD_MUSIC_PLAYERDLG, pParent)
+	: CDialogEx(IDD_FREQUENCY, pParent)
 {
 }
 

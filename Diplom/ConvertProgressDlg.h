@@ -8,6 +8,7 @@
 #include "Music.hpp"
 #include "Helpers.hpp"
 #include "Encoder.h"
+#include "Decoder.h"
 #include <filesystem>
 #include <wmp.h>
 
@@ -103,13 +104,57 @@ public:
 		CDialogEx::OnInitDialog();
 		Helpers helper;
 		SetTimer(1, 16, nullptr);
-		AfxBeginThread( ConvertThread, this);
+		AfxBeginThread(ConvertWAVThread, this);
 
 
 		return TRUE;
 	}
 
-	static UINT ConvertThread(LPVOID pParam) {
+
+
+	/*
+	static UINT ConvertMUCThread(LPVOID pParam) {
+		auto* dlg = static_cast<ConvertProgressDlg*>(pParam);
+		dlg->progress = 0;
+		if (!dlg->music->loadMusic()) return 0;
+		Decoder decoder;
+		dlg->progress = 30;
+
+		WAV::WAVFile convertedFile;
+
+		auto* muc =
+			dynamic_cast<MUC::MUCFile*>(
+				dlg->music->file.get());
+
+		if (muc)
+		{
+			decoder.setProgressCallback([dlg](int percent)
+			{
+				dlg->progress = percent;
+			});
+			convertedFile = decoder.decodeFile(*muc);
+		}
+
+		dlg->progress = 80;
+
+		std::filesystem::path p(
+			dlg->music->GetPath());
+
+		std::string filePath =
+			p.parent_path().string() +
+			"/" +
+			dlg->music->GetMusicName() +
+			convertedFile.getExtension();
+
+		convertedFile.write(filePath.c_str());
+
+		dlg->progress = 100;
+		return 0;
+
+	}
+	*/
+
+	static UINT ConvertWAVThread(LPVOID pParam) {
 		auto* dlg = static_cast<ConvertProgressDlg*>(pParam);
 		dlg->progress = 0;
 		if (!dlg->music->loadMusic()) return 0;

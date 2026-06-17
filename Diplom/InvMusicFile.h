@@ -20,6 +20,8 @@ public:
 	virtual bool play() = 0 ;
 	virtual bool pause() = 0;
 	virtual std::string getPlayableURL (std::string path) = 0;
-	
+	virtual std::vector<float> getCustomWindow(double seconds, int windowSize = 2048) { 
+		return {};
+	};
 };
 

@@ -5,6 +5,7 @@
 #include "resource.h"
 #include "EditMusicDialog.h"
 #include "ConvertProgressDlg.h"
+#include "FrequencyDialog.h"
 #include <algorithm>
 
 IMPLEMENT_DYNAMIC(MusicPLayerDlg, CDialogEx)
@@ -124,7 +125,7 @@ BOOL MusicPLayerDlg::OnInitDialog()
 	// init timer
 
 	SetTimer(5001, 1000, NULL);
-
+	SetTimer( 100, 33, NULL);
 
 
 
@@ -152,14 +153,9 @@ void MusicPLayerDlg::OnPaint()
 
 	auto& apic = activeMusic->getTag("APIC");
 
-	TRACE("APIC size = %zu\n", apic.size());
-	for (size_t i = 0; i < min(64, apic.size()); ++i)
-	{
-		TRACE("%02X ", (unsigned char)apic[i]);
-	}
-	TRACE("\n");
+
 	// -=-=-=-=-=-=-=-=-=-=-=-=-=-= draw Image -=-=-=-=-=-=-=-=-=-=-=-=-=-=
-	if (!musicImage.IsNull()) {
+	if (!musicImage.IsNull() && activeMusic->getExtension() != "wav") {
 		int imageWidth = 200;
 		int imageHeight = 200;
 		//int yImageStart = (int)(rect.Height() / 2) - (int)(imageHeight/2);
@@ -168,7 +164,12 @@ void MusicPLayerDlg::OnPaint()
 		CRect imageRect(xImageStart, yImageStart, xImageStart + imageWidth, yImageStart + imageHeight);
 		musicImage.Draw(dc.m_hDC, imageRect);
 	}
+	else {
+		spectrumRect = CRect( 25, 100, rect.Width() - 25, 270);
+		DrawSpectrum( dc, spectrumRect);
+	}
 	// -=-=-=-=-=-=-=-=-=-=-=-=-=-= Finish draw Image -=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
 
 
 
@@ -195,7 +196,13 @@ void MusicPLayerDlg::initMusic(Music *m) {
 	activeMusic->loadMusic();
 	std::string pathWay = activeMusic->GetPath();
 	LoadImageFromMemory(activeMusic->getTag("APIC"), this->musicImage); // creating CImage from std::vector<char> array
+	currentSpectrum.resize(64);
 
+	for (int i = 0; i < 64; i++)
+	{
+		currentSpectrum[i] =
+			(float)(rand() % 100);
+	}
 }
 
 HRESULT MusicPLayerDlg::LoadImageFromMemory(const std::vector<char>& rawData, CImage& outImage)
@@ -270,11 +277,69 @@ HRESULT MusicPLayerDlg::LoadImageFromMemory(const std::vector<char>& rawData, CI
 	if (FAILED(hr) || outImage.IsNull()) {
 		TRACE("\nFAILED TO LOAD IMAGE\n");
 		outImage.Load(L"images/default.jpg");
-		 AfxMessageBox(L"Не удалось загрузить изображение");
+		// AfxMessageBox(L"Не удалось загрузить изображение");
 		return E_FAIL;
 	}
 
 	return S_OK;
+}
+
+void MusicPLayerDlg::DrawSpectrum( CDC& dc, const CRect& rect)
+{
+	if (currentSpectrum.empty())
+		return;
+
+	const int bars = (int)128;
+	const int usefulBins = 256;
+
+	int width = rect.Width();
+
+	int height = rect.Height()*1.3;
+
+	int samplesPerBar = currentSpectrum.size() / bars;
+	
+	float maxValue = 1.0f;
+	for (float v : currentSpectrum)
+	{
+		float a = fabsf(v);
+		if (a > maxValue)
+			maxValue = a;
+	}
+	int barWidth = max(1, width / bars);
+	TRACE(
+		"bars=%d width=%d height=%d barWidth=%d max=%f\n",
+		bars,
+		width,
+		height,
+		barWidth,
+		maxValue);
+	for (int i = 0; i < bars; i++)
+	{
+		float value = 0.0f;
+
+		for (int j = 0; j < samplesPerBar; j++)
+		{
+			value += fabsf(currentSpectrum[i * samplesPerBar + j]);
+		}
+
+		value /= samplesPerBar;
+
+		float normalized = value / maxValue;
+
+		int barHeight = (int)(normalized * height);
+		int x = rect.left + i * barWidth;
+		int y = rect.bottom - barHeight;
+		if (i < 5)
+		{
+			TRACE(
+				"i=%d value=%f norm=%f h=%d\n",
+				i,
+				value,
+				normalized,
+				barHeight);
+		}
+		dc.Rectangle( x, y, x + 4, rect.bottom);
+	}
 }
 
 
@@ -314,7 +379,7 @@ void MusicPLayerDlg::OnBtnclickedPause()
 void MusicPLayerDlg::OnBtnclickedStop()
 {
 
-	AfxMessageBox(L"Stop clicked");
+	//AfxMessageBox(L"Stop clicked");
 
 }
 
@@ -397,4 +462,35 @@ void MusicPLayerDlg::OnTimer(UINT_PTR nIDEvent) {
 		}
 
 	}
+
+	if (nIDEvent == 100)
+	{
+
+		double musicSeconds = 0;
+
+		pControls->get_currentPosition(
+			&musicSeconds);
+
+		auto window = activeMusic->file->getCustomWindow(musicSeconds);
+		/*
+		TRACE("Window size = %zu\n", window.size());*/
+		encoder.MDCT( window, currentSpectrum);
+		float mn = FLT_MAX;
+		float mx = -FLT_MAX;
+
+		for (float v : currentSpectrum)
+		{
+			if (v < mn) mn = v;
+			if (v > mx) mx = v;
+		}
+		/*
+		TRACE(
+			"Spectrum range: %f .. %f\n", mn, mx);*/
+		for (float& v : currentSpectrum)
+		{
+			v = log10f( fabsf(v) + 1.0f);
+		}
+		InvalidateRect(&spectrumRect, FALSE);
+	}
+
 }

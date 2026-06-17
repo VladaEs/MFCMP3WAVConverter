@@ -123,7 +123,7 @@ BOOL EditMusicDialog::OnInitDialog()
 
 	CString ctext(text.c_str());
 
-	AfxMessageBox(ctext);
+	//AfxMessageBox(ctext);
 	CString MusicName = ConvertToCString(MusicNameCleaned);
 	SetDlgItemText(IDC_MUSICNAME, MusicName);
 
@@ -134,7 +134,7 @@ BOOL EditMusicDialog::OnInitDialog()
 
 	ctext = (text.c_str());
 
-	AfxMessageBox(ctext);
+	//AfxMessageBox(ctext);
 	this->musicNameInput = MusicName;
 	this->authorNameInput = author;
 	return TRUE;

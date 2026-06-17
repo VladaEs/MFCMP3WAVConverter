@@ -86,7 +86,7 @@ public:
 			auto t4 = std::chrono::steady_clock::now();
 
 			MusicCollection.push_back(std::move(music));
-
+			/*
 			auto t5 = std::chrono::steady_clock::now();
 
 			TRACE(_T("path parse      : %lld ms\n"),
@@ -106,7 +106,7 @@ public:
 
 			TRACE(_T("TOTAL FILE      : %lld ms\n"),
 				std::chrono::duration_cast<std::chrono::milliseconds>(t5 - t0).count());
-
+				*/
 			++i;
 		}
 
@@ -175,7 +175,8 @@ public:
 		dc->TextOut(30, 15, _T("#"));
 		dc->TextOut(80, 15, _T("Song Name"));
 		dc->TextOut(clientRect.Width() - paddingLR * 3, 15, _T("Type"));
-		dc->TextOut(clientRect.Width() - paddingLR *2, 15, _T("Duration"));
+		// dc->TextOut(clientRect.Width() - paddingLR *2, 15, _T("Duration"));
+		dc->TextOut(clientRect.Width() - paddingLR * 2, 15, _T(" "));
 		dc->TextOut(clientRect.Width() - paddingLR, 15, _T("Play"));
 		
 		dc->MoveTo(20, 50);
@@ -242,11 +243,17 @@ public:
 				MusicCollection[i].getExtension()
 			)
 		);
-
+		/*
 		dc->TextOut(
 			(rect.right - paddingLR * 2) + tableMargin,
 			rect.top + 10,
 			_T("03:45")
+		);
+		*/
+		dc->TextOut(
+			(rect.right - paddingLR * 2) + tableMargin,
+			rect.top + 10,
+			_T(" ")
 		);
 
 

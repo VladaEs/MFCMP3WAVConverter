@@ -4,6 +4,7 @@
 #include <cstring>
 #include <vector>
 #include <cmath>
+#include <functional>
 #include "ConvertedSample.h"
 #include "MUCFile.h"
 #include "WAVFile.h"
@@ -21,7 +22,7 @@ private:
 	int windowSize = config.getWindowSize();
 	std::vector<WAV::ConvertedSample> convertedChunks;
 	std::vector<float> cosTable = config.getCosTable();
-
+	std::function<void(int)> progressCallback;
 	std::vector<float> decodedPCM;
 	std::vector<int16_t> normalisedPCM;
 public:
@@ -52,13 +53,19 @@ public:
 			for (int i = 0; i < frame.size(); i++) {
 				decodedPCM[pos + i] += frame[i];
 			}
+			int percent = (100 * pos) / chunks.size();
+			if (progressCallback) {
+				progressCallback(percent);
+			}
 		}
+
 		this->normaliseData(this->decodedPCM);
 		return true;
 	}
 
 
 	bool normaliseData(std::vector<float> &pcm) {
+
 		normalisedPCM.resize(pcm.size());
 		for (int i = 0; i < pcm.size(); i++) {
 			float s = pcm[i];
@@ -72,7 +79,9 @@ public:
 
 		return true;
 	}
-
+	void setProgressCallback(std::function<void(int)> cb) {
+		progressCallback = cb;
+	}
 	std::vector<float> decodeFrame(WAV::ConvertedSample &chunk) {
 
 		std::vector<float>IMDCTPrepared = this->dequantization(chunk, config.getQ());

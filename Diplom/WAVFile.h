@@ -186,6 +186,56 @@ namespace WAV {
 		WAV::WavHeader & getHeader() {
 			return this->header;
 		}
+
+		std::vector<float> getCustomWindow( double seconds, int windowSize = 2048)
+		{
+			std::vector<float> window(windowSize);
+
+			int bytesPerSample =
+				header.bits_per_sample / 8;
+
+			int frameSize =
+				bytesPerSample *
+				header.num_channels;
+
+			int currentSample =
+				static_cast<int>(
+					seconds *
+					header.sample_rate);
+
+			size_t currentByte =
+				currentSample *
+				frameSize;
+
+			for (int i = 0; i < windowSize; i++)
+			{
+				size_t pos =
+					currentByte +
+					i * frameSize;
+
+				if (pos + bytesPerSample > data.size())
+				{
+					window[i] = 0.0f;
+					continue;
+				}
+
+				int16_t sample =
+					static_cast<int16_t>(
+					(uint8_t)data[pos] |
+						((uint8_t)data[pos + 1] << 8));
+
+				window[i] =
+					sample / 32768.0f;
+			}
+			TRACE(
+				"seconds=%lf first=%f last=%f\n",
+				seconds,
+				window.front(),
+				window.back());
+
+			return window;
+		}
+
 		void viewHeaders()
 		{
 			TRACE("bits_per_sample : %d\n", header.bits_per_sample);

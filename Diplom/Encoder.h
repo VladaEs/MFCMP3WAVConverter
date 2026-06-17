@@ -182,6 +182,9 @@ public:
 			return false;
 		}
 		*/
+		if (numChannels <= 1) {
+			return true;
+		}
 		int debugCounter = 0;
 		int max = 0;
 		int min = 0;

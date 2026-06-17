@@ -335,7 +335,7 @@ void MusicPLayerDlg::OnBtnclickedConvert()
 	ConvertProgressDlg dlg;
 	dlg.initMusic(activeMusic);
 	dlg.DoModal();
-	AfxMessageBox(_T("Hello"));
+
 	IDD_CONVERTINGPROGRESS;
 
 }
